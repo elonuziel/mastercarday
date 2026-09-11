@@ -30,6 +30,7 @@
     calendarStatusExplanation: document.getElementById("calendar-status-explanation"),
 
     // Countdown
+    countdownTitle: document.getElementById("countdown-title"),
     cdDays: document.getElementById("cd-days"),
     cdHours: document.getElementById("cd-hours"),
     cdMinutes: document.getElementById("cd-minutes"),
@@ -265,27 +266,50 @@
   // ==========================================
   // Countdown Timer
   // ==========================================
+  const HEBREW_MONTH_NAMES = [
+    "ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני",
+    "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"
+  ];
+
   function getNextMastercardDay() {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
     const eventStart = new Date(currentYear, currentMonth, 10, 10, 0, 0);
-    const eventEnd = new Date(currentYear, currentMonth, 11, 23, 59, 59);
+    const eventEnd = new Date(currentYear, currentMonth, 10, 23, 59, 59);
 
     if (now >= eventStart && now <= eventEnd) {
-      return { isLive: true, targetDate: eventEnd };
+      return {
+        isLive: true,
+        targetDate: eventEnd,
+        title: "🔥 יום מאסטרקארד בשיאו! ההטבות מסתיימות בעוד:"
+      };
     }
     if (now < eventStart) {
-      return { isLive: false, targetDate: eventStart };
+      const monthName = HEBREW_MONTH_NAMES[currentMonth];
+      return {
+        isLive: false,
+        targetDate: eventStart,
+        title: `ספירה לאחור לפתיחה (10 ב${monthName} ב-10:00)`
+      };
     }
     const nextMonth = (currentMonth + 1) % 12;
     const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-    return { isLive: false, targetDate: new Date(nextYear, nextMonth, 10, 10, 0, 0) };
+    const nextMonthName = HEBREW_MONTH_NAMES[nextMonth];
+    return {
+      isLive: false,
+      targetDate: new Date(nextYear, nextMonth, 10, 10, 0, 0),
+      title: `ספירה לאחור ל-10 ב${nextMonthName} ב-10:00`
+    };
   }
 
   function startCountdownTimer() {
     function update() {
-      const { isLive, targetDate } = getNextMastercardDay();
+      const { isLive, targetDate, title } = getNextMastercardDay();
+      if (elements.countdownTitle && elements.countdownTitle.textContent !== title) {
+        elements.countdownTitle.textContent = title;
+      }
+
       const now = new Date();
       const diffMs = targetDate - now;
 
