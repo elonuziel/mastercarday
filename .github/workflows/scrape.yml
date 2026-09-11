@@ -1,0 +1,46 @@
+name: Scrape Mastercard Day Catalog
+
+on:
+  workflow_dispatch: # Allows manual trigger from the GitHub "Actions" tab
+  schedule:
+    # Runs automatically every Sunday at 06:00 UTC
+    - cron: '0 6 * * 0'
+    # Runs automatically on the 9th and 10th of each month at 06:00 UTC
+    - cron: '0 6 9,10 * *'
+
+permissions:
+  contents: write # Allows committing updated deals.json and deals.csv
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Mastercard Day Scraper
+        run: |
+          python scraper.py
+
+      - name: Commit and push updated catalog
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/deals.json data/deals.csv
+          if git diff --staged --quiet; then
+            echo "No changes in Mastercard Day catalog."
+          else
+            git commit -m "Automated update of Mastercard Day catalog [skip ci]"
+            git push
+          fi
