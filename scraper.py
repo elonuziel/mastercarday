@@ -233,13 +233,16 @@ def extract_brand_name(title, url="", alt_text=""):
         if domain and len(domain) > 2 and domain.lower() not in ['bit', 'shorturl', 'link', 'mastercard', 'tinyurl']:
             return domain.capitalize()
 
+    # Regex extraction fallback
     # Regex extraction fallback for new brands
     m = re.search(
+        r'(?:באתר(?:\s+(?:ובסניפי|ובחנויות|ובאפליקציית))?|בסניפי|ובסניפי|באפליקציית|ובאפליקציית|ברשת|ובחנויות|בחנויות)\s+([A-Za-z0-9\u0590-\u05FF\.\'-]+)',
         r'(?:באתר(?:\s+(?:ובסניפי|ובחנויות|ובאפליקציית))?|על\s+כל(?:\*)?\s+אתר|בכל\s+אתר|(?:בכל|ב|וב)?\s*סניפי|(?:בכל|ב|וב)?\s*חנויות|באפליקציית|ברשת|במותג)\s+([A-Za-z0-9\u0590-\u05FF\.\'-]+)',
         title
     )
     if m:
         candidate = m.group(1).strip().strip('\'"')
+        if len(candidate) > 1 and candidate not in ['האינטרנט', 'מגוון', 'כל', 'המוצרים']:
         if len(candidate) > 1 and candidate not in ['האינטרנט', 'מגוון', 'כל', 'המוצרים', 'האתר']:
             return candidate
 
