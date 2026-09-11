@@ -74,14 +74,16 @@
   function getDealValidityStatus(deal, date = new Date()) {
     const todayDay = date.getDate();
     const vCode = deal.validity_code || "only_10th";
+    const validDays = Array.isArray(deal.valid_days) && deal.valid_days.length > 0 ? deal.valid_days : null;
 
-    // 1. Tiered Deals (e.g. Airalo: 20% on 10-11th, 15% throughout the entire month)
-    if (vCode === "10_11th_and_all_month") {
-      const ongoingText = deal.ongoing_discount || "15% הנחה";
-      if (todayDay === 10 || todayDay === 11) {
+    // 1. Tiered Deals (Airalo, VOYE): Peak on 10-11, ongoing discount rest of month
+    if (vCode === "10_11th_and_all_month" || deal.ongoing_discount) {
+      const ongoingText = deal.ongoing_discount || "הנחה לכל החודש";
+      const isPeak = todayDay === 10 || todayDay === 11;
+      if (isPeak) {
         return {
           status: "active_today",
-          label: "בתוקף היום! (20% שיא)",
+          label: `בתוקף היום! (${deal.discount} שיא)`,
           subLabel: `${ongoingText} בשאר החודש`,
           activeDiscount: deal.discount,
           badgeClass: "bg-emerald-500/90 text-white border-emerald-400/50",
@@ -90,11 +92,10 @@
           isTiered: true
         };
       } else {
-        // Active today with ongoing discount! Never expired!
         return {
           status: "active_today",
           label: `בתוקף היום! (${ongoingText})`,
-          subLabel: "20% הנחה ב-10-11 בחודש",
+          subLabel: `${deal.discount} ב-10-11 בחודש`,
           activeDiscount: ongoingText,
           badgeClass: "bg-emerald-600/90 text-white border-emerald-500/50",
           dotClass: "bg-emerald-300",
@@ -104,7 +105,44 @@
       }
     }
 
-    // 2. All Month deals are always active today
+    // 2. Exact valid_days support (Hollandia [10, 11], Soltam [8..15], Lenovo [10..13], Walla Shops [9..11])
+    if (validDays) {
+      const isAllMonth = validDays.length >= 28;
+      const minDay = Math.min(...validDays);
+      const maxDay = Math.max(...validDays);
+
+      if (validDays.includes(todayDay)) {
+        const label = isAllMonth ? "בתוקף היום! (כל החודש)" : `בתוקף היום! (${deal.validity || ""})`;
+        return {
+          status: "active_today",
+          label: label.trim(),
+          activeDiscount: deal.discount,
+          badgeClass: "bg-emerald-500/90 text-white border-emerald-400/50",
+          dotClass: "bg-emerald-300",
+          isExpired: false
+        };
+      } else if (todayDay > maxDay) {
+        return {
+          status: "expired",
+          label: "פג תוקף לחודש זה",
+          activeDiscount: deal.discount,
+          badgeClass: "bg-slate-700/90 text-slate-300 border-slate-600",
+          dotClass: "bg-slate-400",
+          isExpired: true
+        };
+      } else {
+        return {
+          status: "upcoming",
+          label: `החל מ-${minDay} בחודש`,
+          activeDiscount: deal.discount,
+          badgeClass: "bg-amber-500/90 text-slate-950 border-amber-400",
+          dotClass: "bg-amber-300",
+          isExpired: false
+        };
+      }
+    }
+
+    // 3. Fallback: All Month deals
     if (vCode === "all_month") {
       return {
         status: "active_today",
@@ -116,7 +154,7 @@
       };
     }
 
-    // 3. 10th-11th deals
+    // 4. Fallback: 10th-11th deals
     if (vCode === "10_11th") {
       if (todayDay === 10 || todayDay === 11) {
         return {
@@ -148,7 +186,7 @@
       }
     }
 
-    // 4. 10th Only deals
+    // 5. Fallback: 10th Only deals
     if (todayDay === 10) {
       return {
         status: "active_today",
@@ -196,14 +234,14 @@
         <strong class="text-emerald-400">🔥 יום מאסטרקארד בשיאו!</strong> כל 44 ההטבות והקופונים פעילים וממתינים למימוש היום.
       `;
     } else if (todayDay === 11) {
-      elements.calendarTodayDot.className = "w-2 h-2 rounded-full bg-blue-400 animate-pulse";
+      elements.calendarTodayDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
       elements.calendarStatusExplanation.innerHTML = `
-        <strong class="text-blue-300">ℹ️ היום ה-11 בחודש:</strong> הטבות מסוימות (כגון <strong>Airalo</strong> ו-<strong>Booking</strong>) עדיין בתוקף היום! הטבות ה-10 בחודש בלבד הסתיימו לחודש זה.
+        <strong class="text-emerald-400">⚡ יום 2 של יום מאסטרקארד!</strong> הטבות מובילות (כגון <strong>Hollandia</strong>, <strong>VOYE</strong>, <strong>Airalo</strong>, <strong>Soltam</strong>, <strong>Lenovo</strong> ו-<strong>Walla Shops</strong>) עדיין בתוקף היום ומסתיימות הלילה בחצות!
       `;
     } else if (todayDay > 11) {
       elements.calendarTodayDot.className = "w-2 h-2 rounded-full bg-slate-400";
       elements.calendarStatusExplanation.innerHTML = `
-        הטבות שנתיות/חודשיות (כמו <strong>Booking</strong>) פעילות. מבצעי ה-10 בחודש יתחדשו במלואם ב-10 לחודש הבא.
+        הטבות מתמשכות (כמו <strong>Airalo</strong>, <strong>VOYE</strong> ו-<strong>Booking</strong>) פעילות בכל ימות החודש. מבצעי ה-10 בחודש יתחדשו במלואם ב-10 לחודש הבא.
       `;
     } else {
       elements.calendarTodayDot.className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse";
@@ -275,24 +313,40 @@
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
-    const eventStart = new Date(currentYear, currentMonth, 10, 10, 0, 0);
-    const eventEnd = new Date(currentYear, currentMonth, 10, 23, 59, 59);
+    
+    // Day 1: 10th at 10:00:00 through 23:59:59
+    const day1Start = new Date(currentYear, currentMonth, 10, 10, 0, 0);
+    const day1End = new Date(currentYear, currentMonth, 10, 23, 59, 59);
 
-    if (now >= eventStart && now <= eventEnd) {
+    // Day 2: 11th until 23:59:59 (Hollandia, VOYE peak, Airalo peak, Walla Shops expire tonight)
+    const day2End = new Date(currentYear, currentMonth, 11, 23, 59, 59);
+
+    if (now >= day1Start && now <= day1End) {
       return {
         isLive: true,
-        targetDate: eventEnd,
-        title: "🔥 יום מאסטרקארד בשיאו! ההטבות מסתיימות בעוד:"
+        targetDate: day1End,
+        title: "🔥 יום מאסטרקארד בשיאו! הטבות ה-10 בחודש מסתיימות הלילה בעוד:"
       };
     }
-    if (now < eventStart) {
+
+    if (now > day1End && now <= day2End) {
+      return {
+        isLive: true,
+        targetDate: day2End,
+        title: "⚡ יום 2 של יום מאסטרקארד! הטבות ה-10-11 מסתיימות הלילה בעוד:"
+      };
+    }
+
+    if (now < day1Start) {
       const monthName = HEBREW_MONTH_NAMES[currentMonth];
       return {
         isLive: false,
-        targetDate: eventStart,
+        targetDate: day1Start,
         title: `ספירה לאחור לפתיחה (10 ב${monthName} ב-10:00)`
       };
     }
+
+    // 12th onwards: countdown to the 10th of next month at 10:00 AM
     const nextMonth = (currentMonth + 1) % 12;
     const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
     const nextMonthName = HEBREW_MONTH_NAMES[nextMonth];
@@ -403,9 +457,18 @@
       } else if (vf.id === "expired") {
         count = state.allDeals.filter(d => getDealValidityStatus(d, now).status === "expired").length;
       } else if (vf.id === "10_11th") {
-        count = state.allDeals.filter(d => d.validity_code === "10_11th" || d.validity_code === "10_11th_and_all_month").length;
+        count = state.allDeals.filter(d =>
+          d.validity_code === "10_11th" ||
+          d.validity_code === "10_11th_and_all_month" ||
+          (Array.isArray(d.valid_days) && d.valid_days.includes(11))
+        ).length;
       } else if (vf.id === "all_month") {
-        count = state.allDeals.filter(d => d.validity_code === "all_month" || d.validity_code === "10_11th_and_all_month").length;
+        count = state.allDeals.filter(d =>
+          d.validity_code === "all_month" ||
+          d.validity_code === "10_11th_and_all_month" ||
+          d.ongoing_discount ||
+          (Array.isArray(d.valid_days) && d.valid_days.length >= 28)
+        ).length;
       } else {
         count = state.allDeals.filter(d => d.validity_code === vf.id).length;
       }
@@ -496,11 +559,18 @@
       if (state.activeValidityFilter === "only_10th" && deal.validity_code !== "only_10th") {
         return false;
       }
-      if (state.activeValidityFilter === "10_11th" && deal.validity_code !== "10_11th" && deal.validity_code !== "10_11th_and_all_month") {
-        return false;
+      if (state.activeValidityFilter === "10_11th") {
+        const is11Valid = deal.validity_code === "10_11th" ||
+                          deal.validity_code === "10_11th_and_all_month" ||
+                          (Array.isArray(deal.valid_days) && deal.valid_days.includes(11));
+        if (!is11Valid) return false;
       }
-      if (state.activeValidityFilter === "all_month" && deal.validity_code !== "all_month" && deal.validity_code !== "10_11th_and_all_month") {
-        return false;
+      if (state.activeValidityFilter === "all_month") {
+        const isAllMonth = deal.validity_code === "all_month" ||
+                           deal.validity_code === "10_11th_and_all_month" ||
+                           deal.ongoing_discount ||
+                           (Array.isArray(deal.valid_days) && deal.valid_days.length >= 28);
+        if (!isAllMonth) return false;
       }
 
       // 2. Category filter
