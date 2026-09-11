@@ -1,7 +1,7 @@
 /**
  * Mastercard Day Israel - Web Application Controller
- * Handles data fetching, live countdown to 10th of the month,
- * category filtering, search, view modes, and 1-click coupon copying.
+ * Handles data fetching, dynamic calendar date validity evaluation,
+ * validity & category filtering, live countdown, search, and 1-click coupon copying.
  */
 
 (() => {
@@ -11,23 +11,25 @@
     filteredDeals: [],
     categories: ["הכל"],
     activeCategory: "הכל",
+    activeValidityFilter: "all", // 'all', 'active_today', 'only_10th', '10_11th', 'all_month', 'expired'
     searchQuery: "",
     sortBy: "discount-desc",
     viewMode: localStorage.getItem("mc_view_mode") || "grid",
     theme: localStorage.getItem("mc_theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
   };
 
-  // DOM Element Selectors
+  // DOM Elements
   const elements = {
-    // Theme & Navigation
     themeToggleBtn: document.getElementById("theme-toggle-btn"),
-    themeIconMoon: document.getElementById("theme-icon-moon"),
-    themeIconSun: document.getElementById("theme-icon-sun"),
     viewGridBtn: document.getElementById("view-grid-btn"),
     viewTableBtn: document.getElementById("view-table-btn"),
     
+    // Calendar context
+    calendarTodayDot: document.getElementById("calendar-today-dot"),
+    calendarTodayText: document.getElementById("calendar-today-text"),
+    calendarStatusExplanation: document.getElementById("calendar-status-explanation"),
+
     // Countdown
-    countdownStatusText: document.getElementById("countdown-status-text"),
     cdDays: document.getElementById("cd-days"),
     cdHours: document.getElementById("cd-hours"),
     cdMinutes: document.getElementById("cd-minutes"),
@@ -35,13 +37,14 @@
 
     // Stats
     statTotalDeals: document.getElementById("stat-total-deals"),
-    statMaxDiscount: document.getElementById("stat-max-discount"),
+    statActiveToday: document.getElementById("stat-active-today"),
     statLastUpdated: document.getElementById("stat-last-updated"),
 
     // Search & Filter
     searchInput: document.getElementById("search-input"),
     searchClearBtn: document.getElementById("search-clear-btn"),
     sortSelect: document.getElementById("sort-select"),
+    validityPillsContainer: document.getElementById("validity-pills-container"),
     categoryPillsContainer: document.getElementById("category-pills-container"),
     filteredCount: document.getElementById("filtered-count"),
     resetFiltersBtn: document.getElementById("reset-filters-btn"),
@@ -61,9 +64,119 @@
     initTheme();
     initViewMode();
     setupEventListeners();
+    renderCalendarContext();
     startCountdownTimer();
     await loadCatalogData();
     handleHashNavigation();
+  }
+
+  // ==========================================
+  // Calendar Context & Dynamic Validity Logic
+  // ==========================================
+  function getDealValidityStatus(deal, date = new Date()) {
+    const todayDay = date.getDate();
+    const vCode = deal.validity_code || "only_10th";
+
+    // 1. All Month deals are always active today
+    if (vCode === "all_month") {
+      return {
+        status: "active_today",
+        label: "בתוקף היום!",
+        badgeClass: "bg-emerald-500/90 text-white border-emerald-400/50",
+        dotClass: "bg-emerald-300",
+        isExpired: false
+      };
+    }
+
+    // 2. 10th-11th deals
+    if (vCode === "10_11th") {
+      if (todayDay === 10 || todayDay === 11) {
+        return {
+          status: "active_today",
+          label: "בתוקף היום! (10-11 בחודש)",
+          badgeClass: "bg-emerald-500/90 text-white border-emerald-400/50",
+          dotClass: "bg-emerald-300",
+          isExpired: false
+        };
+      } else if (todayDay > 11) {
+        return {
+          status: "expired",
+          label: "פג תוקף לחודש זה",
+          badgeClass: "bg-slate-700/90 text-slate-300 border-slate-600",
+          dotClass: "bg-slate-400",
+          isExpired: true
+        };
+      } else {
+        return {
+          status: "upcoming",
+          label: "החל מ-10-11 בחודש",
+          badgeClass: "bg-amber-500/90 text-slate-950 border-amber-400",
+          dotClass: "bg-amber-300",
+          isExpired: false
+        };
+      }
+    }
+
+    // 3. 10th Only deals
+    if (todayDay === 10) {
+      return {
+        status: "active_today",
+        label: "בתוקף היום בלבד!",
+        badgeClass: "bg-emerald-500/90 text-white border-emerald-400/50",
+        dotClass: "bg-emerald-300",
+        isExpired: false
+      };
+    } else if (todayDay > 10) {
+      return {
+        status: "expired",
+        label: "פג תוקף לחודש זה",
+        badgeClass: "bg-slate-700/90 text-slate-300 border-slate-600",
+        dotClass: "bg-slate-400",
+        isExpired: true
+      };
+    } else {
+      return {
+        status: "upcoming",
+        label: "החל מה-10 בחודש",
+        badgeClass: "bg-amber-500/90 text-slate-950 border-amber-400",
+        dotClass: "bg-amber-300",
+        isExpired: false
+      };
+    }
+  }
+
+  function renderCalendarContext() {
+    const now = new Date();
+    const todayDay = now.getDate();
+    const dateFormatted = now.toLocaleDateString("he-IL", {
+      weekday: "long",
+      day: "numeric",
+      month: "long"
+    });
+
+    elements.calendarTodayText.textContent = `היום: ${dateFormatted} (יום ${todayDay} בחודש)`;
+
+    if (todayDay === 10) {
+      elements.calendarTodayDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+      elements.calendarStatusExplanation.innerHTML = `
+        <strong class="text-emerald-400">🔥 יום מאסטרקארד בשיאו!</strong> כל 44 ההטבות והקופונים פעילים וממתינים למימוש היום.
+      `;
+    } else if (todayDay === 11) {
+      elements.calendarTodayDot.className = "w-2 h-2 rounded-full bg-blue-400 animate-pulse";
+      elements.calendarStatusExplanation.innerHTML = `
+        <strong class="text-blue-300">ℹ️ היום ה-11 בחודש:</strong> הטבות מסוימות (כגון <strong>Airalo</strong> ו-<strong>Booking</strong>) עדיין בתוקף היום! הטבות ה-10 בחודש בלבד הסתיימו לחודש זה.
+      `;
+    } else if (todayDay > 11) {
+      elements.calendarTodayDot.className = "w-2 h-2 rounded-full bg-slate-400";
+      elements.calendarStatusExplanation.innerHTML = `
+        הטבות שנתיות/חודשיות (כמו <strong>Booking</strong>) פעילות. מבצעי ה-10 בחודש יתחדשו במלואם ב-10 לחודש הבא.
+      `;
+    } else {
+      elements.calendarTodayDot.className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse";
+      elements.calendarStatusExplanation.innerHTML = `
+        מתכוננים ל-10 בחודש הקרוב! מבצעי ה-10 בחודש ייפתחו ב-10:00 בבוקר.
+      `;
+    }
   }
 
   // ==========================================
@@ -117,28 +230,21 @@
   }
 
   // ==========================================
-  // Countdown Timer Logic
+  // Countdown Timer
   // ==========================================
   function getNextMastercardDay() {
     const now = new Date();
     const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); // 0-11
-    const currentDay = now.getDate();
-    const currentHour = now.getHours();
-
-    // Event window: 10th 10:00 to 11th 23:59
+    const currentMonth = now.getMonth();
     const eventStart = new Date(currentYear, currentMonth, 10, 10, 0, 0);
     const eventEnd = new Date(currentYear, currentMonth, 11, 23, 59, 59);
 
     if (now >= eventStart && now <= eventEnd) {
       return { isLive: true, targetDate: eventEnd };
     }
-
     if (now < eventStart) {
       return { isLive: false, targetDate: eventStart };
     }
-
-    // After 11th, target is 10th of next month
     const nextMonth = (currentMonth + 1) % 12;
     const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
     return { isLive: false, targetDate: new Date(nextYear, nextMonth, 10, 10, 0, 0) };
@@ -149,13 +255,6 @@
       const { isLive, targetDate } = getNextMastercardDay();
       const now = new Date();
       const diffMs = targetDate - now;
-
-      if (isLive) {
-        elements.countdownStatusText.textContent = "🔥 יום מאסטרקארד פעיל עכשיו! ההטבות בתוקף";
-      } else {
-        const targetMonthName = targetDate.toLocaleDateString("he-IL", { month: "long" });
-        elements.countdownStatusText.textContent = `מתכוננים ל-10 ב${targetMonthName}`;
-      }
 
       if (diffMs <= 0) {
         elements.cdDays.textContent = "00";
@@ -182,7 +281,7 @@
   }
 
   // ==========================================
-  // Data Fetching & Processing
+  // Data Loading
   // ==========================================
   async function loadCatalogData() {
     try {
@@ -194,6 +293,7 @@
       state.categories = data.metadata?.categories || ["הכל"];
 
       updateStatsRibbon(data.metadata);
+      renderValidityPills();
       renderCategoryPills();
       applyFilters();
     } catch (err) {
@@ -207,15 +307,10 @@
 
     elements.statTotalDeals.textContent = `${metadata.total_deals || state.allDeals.length}`;
 
-    // Find highest discount
-    let maxPct = 0;
-    let maxNis = 0;
-    state.allDeals.forEach(d => {
-      if (d.discount_type === "percent" && d.discount_numeric > maxPct) maxPct = d.discount_numeric;
-      if (d.discount_type === "fixed" && d.discount_numeric > maxNis) maxNis = d.discount_numeric;
-    });
-
-    elements.statMaxDiscount.textContent = maxNis > 0 ? `₪${maxNis} / ${maxPct}%` : `${maxPct}%`;
+    // Count active today
+    const now = new Date();
+    const activeTodayCount = state.allDeals.filter(d => getDealValidityStatus(d, now).status === "active_today").length;
+    elements.statActiveToday.textContent = `${activeTodayCount}`;
 
     if (metadata.last_updated) {
       const date = new Date(metadata.last_updated);
@@ -224,6 +319,62 @@
         month: "2-digit"
       });
     }
+  }
+
+  // ==========================================
+  // Validity Filter Pills
+  // ==========================================
+  function renderValidityPills() {
+    elements.validityPillsContainer.innerHTML = "";
+    const now = new Date();
+
+    const validityFilterDefs = [
+      { id: "all", label: "כל ההטבות" },
+      { id: "active_today", label: "בתוקף היום 🔥" },
+      { id: "only_10th", label: "10 בחודש בלבד" },
+      { id: "10_11th", label: "גם ב-11 בחודש" },
+      { id: "all_month", label: "כל החודש" },
+      { id: "expired", label: "פג תוקף לחודש זה" }
+    ];
+
+    validityFilterDefs.forEach(vf => {
+      let count = 0;
+      if (vf.id === "all") {
+        count = state.allDeals.length;
+      } else if (vf.id === "active_today") {
+        count = state.allDeals.filter(d => getDealValidityStatus(d, now).status === "active_today").length;
+      } else if (vf.id === "expired") {
+        count = state.allDeals.filter(d => getDealValidityStatus(d, now).status === "expired").length;
+      } else {
+        count = state.allDeals.filter(d => d.validity_code === vf.id).length;
+      }
+
+      const isActive = state.activeValidityFilter === vf.id;
+
+      const button = document.createElement("button");
+      button.className = `shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+        isActive
+          ? "bg-slate-900 dark:bg-red-600 text-white shadow-xs"
+          : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+      }`;
+
+      button.innerHTML = `
+        <span>${escapeHtml(vf.label)}</span>
+        <span class="px-1.5 py-0.2 text-[10px] rounded-full ${
+          isActive
+            ? "bg-slate-800 dark:bg-red-700 text-white"
+            : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+        }">${count}</span>
+      `;
+
+      button.addEventListener("click", () => {
+        state.activeValidityFilter = vf.id;
+        renderValidityPills();
+        applyFilters();
+      });
+
+      elements.validityPillsContainer.appendChild(button);
+    });
   }
 
   // ==========================================
@@ -240,9 +391,9 @@
       const isActive = state.activeCategory === cat;
 
       const button = document.createElement("button");
-      button.className = `shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+      button.className = `shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
         isActive
-          ? "bg-red-600 text-white shadow-sm"
+          ? "bg-red-600 text-white shadow-xs"
           : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
       }`;
 
@@ -250,7 +401,7 @@
         <span>${escapeHtml(cat)}</span>
         <span class="px-1.5 py-0.2 text-[10px] rounded-full ${
           isActive
-            ? "bg-red-700/80 text-white"
+            ? "bg-red-700/90 text-white"
             : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
         }">${count}</span>
       `;
@@ -270,16 +421,30 @@
   // ==========================================
   function applyFilters() {
     const q = state.searchQuery.trim().toLowerCase();
+    const now = new Date();
 
     state.filteredDeals = state.allDeals.filter(deal => {
-      // Category check
+      // 1. Validity filter
+      const vStatus = getDealValidityStatus(deal, now);
+      if (state.activeValidityFilter === "active_today" && vStatus.status !== "active_today") {
+        return false;
+      }
+      if (state.activeValidityFilter === "expired" && vStatus.status !== "expired") {
+        return false;
+      }
+      if (["only_10th", "10_11th", "all_month"].includes(state.activeValidityFilter) && deal.validity_code !== state.activeValidityFilter) {
+        return false;
+      }
+
+      // 2. Category filter
       if (state.activeCategory !== "הכל" && deal.category !== state.activeCategory) {
         return false;
       }
 
-      // Search query check
+      // 3. Search query check
       if (q) {
-        const haystack = `${deal.brand} ${deal.title} ${deal.coupon} ${deal.category} ${deal.description}`.toLowerCase();
+        const bulletsText = (deal.terms_bullets || []).join(" ");
+        const haystack = `${deal.brand} ${deal.title} ${deal.coupon} ${deal.discount} ${deal.category} ${deal.min_spend || ""} ${deal.description} ${bulletsText}`.toLowerCase();
         if (!haystack.includes(q)) {
           return false;
         }
@@ -288,24 +453,23 @@
       return true;
     });
 
-    // Sort deals
+    // 4. Sorting
     if (state.sortBy === "discount-desc") {
       state.filteredDeals.sort((a, b) => b.discount_numeric - a.discount_numeric);
     } else if (state.sortBy === "brand-asc") {
       state.filteredDeals.sort((a, b) => a.brand.localeCompare(b.brand, "he"));
+    } else if (state.sortBy === "min-spend-asc") {
+      state.filteredDeals.sort((a, b) => (a.min_spend_numeric || 0) - (b.min_spend_numeric || 0));
     }
 
-    // Update count
     elements.filteredCount.textContent = state.filteredDeals.length;
-
-    // Toggle clear search button
     elements.searchClearBtn.classList.toggle("hidden", !state.searchQuery);
 
     renderDeals();
   }
 
   // ==========================================
-  // Rendering Views
+  // Rendering Views (Grid & Table)
   // ==========================================
   function renderDeals() {
     if (state.filteredDeals.length === 0) {
@@ -332,13 +496,17 @@
   }
 
   function renderGridView() {
+    const now = new Date();
+
     elements.dealsGrid.innerHTML = state.filteredDeals.map(deal => {
-      const hasImage = deal.image && !deal.image.includes("sep.png") && !deal.image.includes(".svg");
+      const vInfo = getDealValidityStatus(deal, now);
+      const isExpired = vInfo.isExpired;
       const couponCode = deal.coupon || "MASTERCARDAY";
       const directUrl = deal.url || "https://www.mastercard.com/il/he/%D7%90%D7%99%D7%A9%D7%99/find-a-card/card-benefits/mastercard-day.html";
+      const hasImage = deal.image && !deal.image.includes("sep.png") && !deal.image.includes(".svg");
 
       return `
-        <article id="${deal.id}" class="deal-card relative flex flex-col bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden hover:shadow-md hover:border-red-300 dark:hover:border-red-900/60">
+        <article id="${deal.id}" class="deal-card ${isExpired ? 'deal-expired' : ''} relative flex flex-col bg-white dark:bg-mc-cardDark rounded-2xl border ${isExpired ? 'border-slate-300 dark:border-slate-800' : 'border-slate-200 dark:border-mc-borderDark'} shadow-sm overflow-hidden hover:shadow-md hover:border-red-300 dark:hover:border-red-900/60">
           
           <!-- Card Image & Header -->
           <div class="relative h-44 bg-slate-100 dark:bg-slate-900 overflow-hidden flex items-center justify-center">
@@ -351,18 +519,18 @@
                    </div>`
             }
 
-            <!-- Discount Badge -->
-            <div class="absolute top-3 right-3 px-3 py-1 rounded-xl bg-red-600 text-white text-xs font-black shadow-md flex items-center gap-1">
-              <i data-lucide="percent" class="w-3 h-3"></i>
-              <span>${escapeHtml(deal.discount)}</span>
+            <!-- Live Validity Status Badge (Top Right) -->
+            <div class="absolute top-3 right-3 px-2.5 py-1 rounded-xl text-xs font-bold shadow-md border flex items-center gap-1.5 backdrop-blur-md ${vInfo.badgeClass}">
+              <span class="w-2 h-2 rounded-full ${vInfo.dotClass} ${vInfo.status === 'active_today' ? 'animate-pulse' : ''}"></span>
+              <span>${escapeHtml(vInfo.label)}</span>
             </div>
 
-            <!-- Category & Validity Badges -->
+            <!-- Category & Validity Badges (Bottom Right) -->
             <div class="absolute bottom-3 right-3 flex items-center gap-1.5 flex-wrap">
-              <span class="px-2.5 py-0.5 rounded-lg bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-medium">
+              <span class="px-2.5 py-0.5 rounded-lg bg-slate-900/85 backdrop-blur-md text-white text-[11px] font-medium">
                 ${escapeHtml(deal.category)}
               </span>
-              <span class="px-2.5 py-0.5 rounded-lg bg-amber-500/90 backdrop-blur-md text-slate-950 text-[11px] font-semibold">
+              <span class="px-2.5 py-0.5 rounded-lg bg-slate-900/85 backdrop-blur-md text-amber-300 text-[11px] font-medium">
                 ${escapeHtml(deal.validity)}
               </span>
             </div>
@@ -370,22 +538,54 @@
 
           <!-- Card Content Body -->
           <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
-            <div class="space-y-2">
-              <div class="flex items-center justify-between gap-2">
-                <h3 class="font-bold text-base text-slate-900 dark:text-white leading-tight">
-                  ${escapeHtml(deal.brand)}
-                </h3>
-                <button onclick="window.copyDealLink('${deal.id}')" title="שתף הטבה" class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition hover:bg-slate-100 dark:hover:bg-slate-700">
+            <div class="space-y-3">
+              
+              <!-- Brand, Share & Pricing -->
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h3 class="font-bold text-lg text-slate-900 dark:text-white leading-tight">
+                    ${escapeHtml(deal.brand)}
+                  </h3>
+                  <!-- Discount Badge & Min Purchase Sub-Badge -->
+                  <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-red-600 text-white text-xs font-bold shadow-xs">
+                      <i data-lucide="percent" class="w-3 h-3"></i>
+                      <span>${escapeHtml(deal.discount)}</span>
+                    </span>
+                    ${
+                      deal.min_spend
+                        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800 text-[11px] font-semibold">
+                             <span>מעל ${escapeHtml(deal.min_spend)}</span>
+                           </span>`
+                        : ''
+                    }
+                  </div>
+                </div>
+
+                <button onclick="window.copyDealLink('${deal.id}')" title="שתף קישור ישיר להטבה" class="p-2 rounded-xl text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
                   <i data-lucide="share-2" class="w-4 h-4"></i>
                 </button>
               </div>
-              <p class="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+
+              <!-- Deal Summary Title -->
+              <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                 ${escapeHtml(deal.title)}
               </p>
+
+              <!-- Structured Conditions Bullets -->
+              <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 space-y-1.5">
+                <div class="text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                  <i data-lucide="check-square" class="w-3.5 h-3.5 text-red-500"></i>
+                  <span>עיקרי התנאים:</span>
+                </div>
+                <ul class="text-[11px] text-slate-600 dark:text-slate-400 space-y-1">
+                  ${(deal.terms_bullets || []).map(b => `<li class="flex items-start gap-1 leading-snug"><span>${escapeHtml(b)}</span></li>`).join("")}
+                </ul>
+              </div>
             </div>
 
             <!-- Coupon Box & 1-Click Copy -->
-            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-between gap-2">
+            <div class="p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
               <div class="flex items-center gap-2 overflow-hidden">
                 <i data-lucide="ticket" class="w-4 h-4 text-amber-500 shrink-0"></i>
                 <div class="text-right truncate">
@@ -399,17 +599,16 @@
               </button>
             </div>
 
-            <!-- Action Buttons -->
+            <!-- Action Buttons & Expandable Legal Terms -->
             <div class="space-y-2 pt-1">
               <a href="${escapeHtml(directUrl)}" target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-xs font-semibold transition shadow-xs">
                 <span>מעבר לאתר ההטבה</span>
                 <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
               </a>
 
-              <!-- Accordion Terms -->
               <details class="group text-xs text-slate-500 dark:text-slate-400">
                 <summary class="cursor-pointer list-none flex items-center justify-between py-1 text-[11px] font-medium hover:text-slate-700 dark:hover:text-slate-200">
-                  <span>תנאי המבצע ותקנון</span>
+                  <span>תקנון מלא ואותיות קטנות</span>
                   <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition group-open:rotate-180"></i>
                 </summary>
                 <div class="mt-2 p-2.5 rounded-lg bg-slate-100/70 dark:bg-slate-900/60 text-[11px] leading-relaxed border border-slate-200/60 dark:border-slate-800">
@@ -424,22 +623,31 @@
   }
 
   function renderTableView() {
+    const now = new Date();
+
     elements.dealsTableBody.innerHTML = state.filteredDeals.map(deal => {
+      const vInfo = getDealValidityStatus(deal, now);
       const couponCode = deal.coupon || "MASTERCARDAY";
       const directUrl = deal.url || "#";
 
       return `
-        <tr id="${deal.id}" class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
+        <tr id="${deal.id}" class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors ${vInfo.isExpired ? 'opacity-70' : ''}">
           <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">
             ${escapeHtml(deal.brand)}
+          </td>
+          <td class="px-4 py-3.5 whitespace-nowrap">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${vInfo.badgeClass}">
+              <span class="w-1.5 h-1.5 rounded-full ${vInfo.dotClass}"></span>
+              <span>${escapeHtml(vInfo.label)}</span>
+            </span>
           </td>
           <td class="px-4 py-3.5 whitespace-nowrap">
             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-100 text-red-800 dark:bg-red-950/70 dark:text-red-300">
               ${escapeHtml(deal.discount)}
             </span>
           </td>
-          <td class="px-4 py-3.5 text-xs text-slate-600 dark:text-slate-300 max-w-xs truncate">
-            ${escapeHtml(deal.title)}
+          <td class="px-4 py-3.5 whitespace-nowrap text-xs text-slate-600 dark:text-slate-300">
+            ${deal.min_spend ? `<span class="font-semibold text-amber-600 dark:text-amber-400">מעל ${escapeHtml(deal.min_spend)}</span>` : '<span class="text-slate-400">ללא מינימום</span>'}
           </td>
           <td class="px-4 py-3.5 whitespace-nowrap">
             <div class="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 font-mono text-xs">
@@ -449,8 +657,8 @@
               </button>
             </div>
           </td>
-          <td class="px-4 py-3.5 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
-            ${escapeHtml(deal.validity)}
+          <td class="px-4 py-3.5 text-xs text-slate-500 dark:text-slate-400 max-w-xs truncate">
+            ${escapeHtml((deal.terms_bullets || []).slice(0, 2).join(" • "))}
           </td>
           <td class="px-4 py-3.5 whitespace-nowrap text-center">
             <div class="flex items-center justify-center gap-2">
@@ -468,12 +676,12 @@
   }
 
   // ==========================================
-  // User Actions (Copy, Share, Hash)
+  // Clipboard & Link Actions
   // ==========================================
   window.copyCoupon = async (code) => {
     try {
       await navigator.clipboard.writeText(code);
-      showToast(`קוד הקופון <strong>${code}</strong> הועתק ללוח!`, "success");
+      showToast(`קוד הקופון <strong>${code}</strong> הועתק בהצלחה!`, "success");
     } catch (err) {
       showToast("שגיאה בהעתקת הקוד", "error");
     }
@@ -529,7 +737,7 @@
 
     setTimeout(() => {
       toast.style.opacity = "0";
-      toast.style.transform = "translateY(12px)";
+      toast.style.transform = "translateY(14px)";
       toast.style.transition = "all 0.25s ease";
       setTimeout(() => toast.remove(), 250);
     }, 2800);
@@ -539,24 +747,19 @@
   // Event Listeners & Helpers
   // ==========================================
   function setupEventListeners() {
-    // Theme toggle
     elements.themeToggleBtn.addEventListener("click", toggleTheme);
-
-    // View toggles
     elements.viewGridBtn.addEventListener("click", () => setViewMode("grid"));
     elements.viewTableBtn.addEventListener("click", () => setViewMode("table"));
 
-    // Search input
     let debounceTimer;
     elements.searchInput.addEventListener("input", (e) => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         state.searchQuery = e.target.value;
         applyFilters();
-      }, 200);
+      }, 150);
     });
 
-    // Clear search
     elements.searchClearBtn.addEventListener("click", () => {
       elements.searchInput.value = "";
       state.searchQuery = "";
@@ -564,19 +767,19 @@
       elements.searchInput.focus();
     });
 
-    // Sort select
     elements.sortSelect.addEventListener("change", (e) => {
       state.sortBy = e.target.value;
       applyFilters();
     });
 
-    // Reset filters
     elements.resetFiltersBtn.addEventListener("click", () => {
       elements.searchInput.value = "";
       state.searchQuery = "";
       state.activeCategory = "הכל";
+      state.activeValidityFilter = "all";
       state.sortBy = "discount-desc";
       elements.sortSelect.value = "discount-desc";
+      renderValidityPills();
       renderCategoryPills();
       applyFilters();
     });
@@ -605,4 +808,3 @@
     init();
   }
 })();
-

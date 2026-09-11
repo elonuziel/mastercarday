@@ -40,34 +40,110 @@ except ImportError:
     print("[!] 'beautifulsoup4' is required. Run: pip install beautifulsoup4", file=sys.stderr)
     sys.exit(1)
 
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
 DEFAULT_URL = "https://www.mastercard.com/il/he/%D7%90%D7%99%D7%A9%D7%99/find-a-card/card-benefits/mastercard-day.html"
+
+# Known brands dictionary to ensure 100% clean, standardized brand names
+KNOWN_BRANDS = [
+    ("עולם הקולנוע והחשמל", "עולם הקולנוע והחשמל"),
+    ("עולם הקולנוע", "עולם הקולנוע והחשמל"),
+    ("דומינו", "דומינו'ס"),
+    ("golda", "Golda"),
+    ("גולדה", "Golda"),
+    ("terminalx", "TerminalX"),
+    ("טרמינל", "TerminalX"),
+    ("מקדונלד", "מקדונלד'ס"),
+    ("bits of gold", "Bits of Gold"),
+    ("קפה עלית", "קפה עלית"),
+    ("עלית", "קפה עלית"),
+    ("bug", "BUG"),
+    ("באג", "BUG"),
+    ("דרך היין", "דרך היין"),
+    ("משלוחה", "משלוחה"),
+    ("ev-edge", "EV-EDGE"),
+    ("soho", "SOHO"),
+    ("סוהו", "SOHO"),
+    ("voye", "VOYE"),
+    ("aldo", "ALDO"),
+    ("אלדו", "ALDO"),
+    ("airalo", "Airalo"),
+    ("careline", "Careline"),
+    ("קרליין", "Careline"),
+    ("gali", "GALI"),
+    ("גלי", "GALI"),
+    ("lee cooper", "Lee Cooper"),
+    ("לי קופר", "Lee Cooper"),
+    ("nine west", "Nine West"),
+    ("ניין ווסט", "Nine West"),
+    ("adidas", "adidas"),
+    ("אדידס", "adidas"),
+    ("gett", "Gett"),
+    ("גט", "Gett"),
+    ("minene", "Minene"),
+    ("מיננה", "Minene"),
+    ("emanuel", "Emanuel"),
+    ("עמנואל", "Emanuel"),
+    ("afrodita", "Afrodita"),
+    ("אפרודיטה", "Afrodita"),
+    ("soltam", "Soltam"),
+    ("סולתם", "Soltam"),
+    ("sweetweet", "Sweetweet"),
+    ("סוויטוויט", "Sweetweet"),
+    ("emporium", "Emporium"),
+    ("אמפוריום", "Emporium"),
+    ("guess", "Guess"),
+    ("גס", "Guess"),
+    ("nautica", "Nautica"),
+    ("נאוטיקה", "Nautica"),
+    ("timberland", "Timberland"),
+    ("טימברלנד", "Timberland"),
+    ("עברית", "עברית"),
+    ("amazon", "Amazon"),
+    ("אמזון", "Amazon"),
+    ("b.unique", "B.unique"),
+    ("בי יוניק", "B.unique"),
+    ("ksp", "KSP"),
+    ("lenovo", "Lenovo"),
+    ("לנובו", "Lenovo"),
+    ("nintendo", "Nintendo"),
+    ("נינטנדו", "Nintendo"),
+    ("walla shops", "Walla Shops"),
+    ("וואלה שופס", "Walla Shops"),
+    ("אופטיקנה", "אופטיקנה"),
+    ("last price", "Last Price"),
+    ("לאסט פרייס", "Last Price"),
+    ("yellow", "Yellow"),
+    ("ילו", "Yellow"),
+    ("rebar", "rebar"),
+    ("ריבר", "rebar"),
+    ("booking", "Booking.com"),
+    ("בוקינג", "Booking.com"),
+    ("aliexpress", "AliExpress"),
+    ("אליאקספרס", "AliExpress"),
+    ("hollandia", "Hollandia"),
+    ("הולנדיה", "Hollandia")
+]
 
 # Smart Category Classifier mapping keywords to standard categories
 CATEGORY_RULES = [
     {
         "category": "תיירות ונופש",
-        "keywords": ["airalo", "voye", "טיסות", "חו\"ל", "מלונות", "חבילות גלישה", "מזוודות", "השכרת רכב", "esim", "אינטרנט בחו\"ל", "נופש", "תיירות", "חופשה"]
+        "keywords": ["airalo", "voye", "booking", "gett", "טיסות", "חו\"ל", "מלונות", "חבילות גלישה", "מזוודות", "השכרת רכב", "esim", "אינטרנט בחו\"ל", "נופש", "תיירות", "חופשה"]
     },
     {
         "category": "קולינריה ומסעדות",
-        "keywords": ["rebar", "golda", "גולדה", "ריבר", "יין", "גלידה", "משקאות", "מסעדות", "קפה", "שוקולד", "אוכל", "בירה", "קולינריה", "מתוקים", "פיצה", "סושי", "mcdonald", "מקדונלד", "domino", "דומינו", "mishloha", "משלוחה", "עלית"]
+        "keywords": ["rebar", "golda", "גולדה", "ריבר", "יין", "גלידה", "משקאות", "מסעדות", "קפה", "שוקולד", "אוכל", "בירה", "קולינריה", "מתוקים", "פיצה", "סושי", "mcdonald", "מקדונלד", "domino", "דומינו", "mishloha", "משלוחה", "עלית", "yellow", "sweetweet", "דרך היין"]
     },
     {
         "category": "אופנה ולייף סטייל",
-        "keywords": ["terminalx", "adidas", "אדידס", "emanuel", "עמנואל", "טרמינל", "נעליים", "ביגוד", "אופנה", "תכשיטים", "שעונים", "תיקים", "הלבשה", "בגדים", "ספורט"]
+        "keywords": ["terminalx", "adidas", "אדידס", "emanuel", "עמנואל", "טרמינל", "נעליים", "ביגוד", "אופנה", "תכשיטים", "שעונים", "תיקים", "הלבשה", "בגדים", "ספורט", "aldo", "gali", "lee cooper", "nine west", "afrodita", "emporium", "guess", "nautica", "timberland", "b.unique", "אופטיקנה"]
     },
     {
         "category": "חשמל וטכנולוגיה",
-        "keywords": ["ksp", "עולם הקולנוע", "חשמל", "סמארטפון", "מחשב", "אוזניות", "גיימינג", "גאדג'טים", "טלוויזיה", "אלקטרוניקה", "מוצרי חשמל", "קולנוע", "bug", "באג"]
+        "keywords": ["ksp", "עולם הקולנוע", "חשמל", "סמארטפון", "מחשב", "אוזניות", "גיימינג", "גאדג'טים", "טלוויזיה", "אלקטרוניקה", "מוצרי חשמל", "קולנוע", "bug", "באג", "lenovo", "nintendo", "last price", "walla shops"]
     },
     {
         "category": "לבית ולמשפחה",
-        "keywords": ["hollandia", "הולנדיה", "מזרנים", "ריהוט", "עיצוב הבית", "מצעים", "כלי בית", "מטבח", "גינון", "קמפינג", "לבית", "טקסטיל", "מיטות"]
+        "keywords": ["hollandia", "הולנדיה", "מזרנים", "ריהוט", "עיצוב הבית", "מצעים", "כלי בית", "מטבח", "גינון", "קמפינג", "לבית", "טקסטיל", "מיטות", "soltam", "סולתם", "minene", "מיננה"]
     }
 ]
 
@@ -92,7 +168,7 @@ def parse_arguments():
     parser.add_argument(
         "--input-html",
         default=None,
-        help="Optional local HTML file path to parse instead of fetching online (for offline testing/fallback)"
+        help="Optional local HTML file path to parse instead of fetching online"
     )
     return parser.parse_args()
 
@@ -133,54 +209,102 @@ def fetch_page_html(url, impersonate="chrome124", max_retries=3):
 
 
 def extract_brand_name(title, url="", alt_text=""):
-    """Extract clean brand name from deal title, URL, or image alt attribute."""
-    # Pattern 1: Common Hebrew merchant prefixes in title (e.g. באתר, בסניפי, באפליקציית, ברשת, בדומינו'ס, במקדונלד'ס)
-    m = re.search(
-        r'(?:באתר\s+ובסניפי|באתר\s+ובאפליקציית|באתר|בסניפי|באפליקציית|ברשת|ובאפליקציית|ב)\s*([A-Za-z0-9\u0590-\u05FF\s\'\"-]+?)(?:\s+(?:\bעל\b|\bבקניית\b|\bברכישת\b|\bכולל\b|\bלרוכשים\b|\bומעלה\b|\bבלבד\b|\bלמגוון\b|\bב-)|$)',
-        title
-    )
-    if m:
-        candidate = m.group(1).strip().strip('\'"')
-        candidate = re.sub(r'^(?:של|את|כל)\s+', '', candidate)
-        if len(candidate) > 1 and candidate not in ['האינטרנט', 'מגוון', 'כל', 'המוצרים', 'קניית', 'רכישת']:
-            return candidate
+    """Extract clean, standardized brand name from title, url, or alt text."""
+    # First priority: Title and URL (avoids CMS copy-paste bugs in image alt text)
+    title_url = f"{title} {url}".lower()
+    for needle, brand_name in KNOWN_BRANDS:
+        if needle.lower() in title_url:
+            return brand_name
 
-    # Pattern 2: Domain name from URL
+    # Second priority: Clean image alt text
+    alt_lower = alt_text.lower()
+    for needle, brand_name in KNOWN_BRANDS:
+        if needle.lower() in alt_lower:
+            return brand_name
+
+    # Third priority: Domain name
     if url:
         domain = urlparse(url).netloc.replace('www.', '').split('.')[0]
         if domain and len(domain) > 2 and domain.lower() not in ['bit', 'shorturl', 'link', 'mastercard', 'tinyurl']:
             return domain.capitalize()
 
-    # Pattern 3: Image alt text if descriptive and not generic
-    if alt_text:
-        clean_alt = alt_text.strip()
-        if len(clean_alt) > 1 and clean_alt.lower() not in ['promo', 'image', 'banner', 'mastercard', '1280x720', 'sep']:
-            return clean_alt.capitalize()
+    # Regex extraction fallback
+    m = re.search(
+        r'(?:באתר(?:\s+(?:ובסניפי|ובחנויות|ובאפליקציית))?|בסניפי|ובסניפי|באפליקציית|ובאפליקציית|ברשת|ובחנויות|בחנויות)\s+([A-Za-z0-9\u0590-\u05FF\.\'-]+)',
+        title
+    )
+    if m:
+        candidate = m.group(1).strip().strip('\'"')
+        if len(candidate) > 1 and candidate not in ['האינטרנט', 'מגוון', 'כל', 'המוצרים']:
+            return candidate
 
     return "Mastercard Day"
 
 
-def extract_discount(title, description=""):
-    """Extract discount string, numeric value, and discount type."""
-    # Check percentage discount (e.g. 20%, 15.5%)
-    disc_pct = re.search(r'(\d+(?:\.\d+)?)\s*%', title)
-    if disc_pct:
-        pct_val = float(disc_pct.group(1))
-        return f"{int(pct_val)}%", int(pct_val), "percent"
+def extract_discount_and_pricing(title, description=""):
+    """
+    Extract accurate discount label, numeric sort value, discount type, and minimum spend.
+    Distinguishes percent discount, fixed cash discount, special price, 1+1, and gift vouchers.
+    """
+    text = f"{title} {description}"
 
-    # Check fixed NIS amount (e.g. ₪50 הנחה, 50 ₪ הנחה, ₪84 על קילו)
-    disc_nis = re.search(r'(?:₪\s*(\d+)|\b(\d+)\s*₪)', title)
-    if disc_nis:
-        val = int(disc_nis.group(1) or disc_nis.group(2))
-        return f"₪{val}", val, "fixed"
+    # 1. Minimum Spend Detection (e.g. "בקניה מעל 2000 ₪", "ברכישת ₪250 ומעלה", "בקנייה מעל $49")
+    min_spend = None
+    min_spend_numeric = 0
+    m_spend = re.search(r'(?:ברכישת|בקנייה|בקניה|לרוכשים)\s+(?:ב-?|מעל\s+|בסך\s*)?\s*([₪$]?\s*\d+(?:,\d+)?\s*[₪$]?)(?:\s*ומעלה)?', text)
+    if m_spend:
+        raw_spend = m_spend.group(1).strip()
+        # Ensure it is not matching the discount amount itself
+        if not re.search(r'^(?:₪50|₪30|200\s*₪|5\$|10|130\s*₪|84|25)$', raw_spend):
+            min_spend = raw_spend
+            num_clean = re.sub(r'[^\d]', '', raw_spend)
+            if num_clean:
+                min_spend_numeric = int(num_clean)
 
-    # Check in description as fallback
-    disc_pct_desc = re.search(r'(\d+(?:\.\d+)?)\s*%\s*הנחה', description)
-    if disc_pct_desc:
-        pct_val = float(disc_pct_desc.group(1))
-        return f"{int(pct_val)}%", int(pct_val), "percent"
+    # 2. Check 1+1
+    if "1+1" in title or "1+1" in description:
+        return "1+1 מתנה", 100, "one_plus_one", min_spend, min_spend_numeric
 
-    return "הטבה מיוחדת", 0, "special"
+    # 3. Check Cashback
+    m_cashback = re.search(r'(\d+(?:\.\d+)?)\s*%\s*(?:קרדיט|קאשבק)', title)
+    if m_cashback:
+        val = int(float(m_cashback.group(1)))
+        return f"{val}% קאשבק", val, "cashback", min_spend, min_spend_numeric
+
+    # 4. Check Special Price / Bundles (e.g. "ב-130 ₪", "₪84 על קילו", "2 יח' ב-10 ₪")
+    if "ב-130 ₪" in title or "130 ₪" in title and "פיצות" in title:
+        return "מחיר מבצע: ₪130", 130, "special_price", min_spend, min_spend_numeric
+    if "₪84 על קילו גלידה" in title or "84 ₪" in title:
+        return "מחיר מבצע: ₪84", 84, "special_price", min_spend, min_spend_numeric
+    if "ב- 10 ₪" in title or "ב-10 ₪" in title:
+        return "2 יח' ב-₪10", 10, "special_price", min_spend, min_spend_numeric
+
+    # 5. Check Gift Voucher (מתנה לטעינה)
+    m_gift = re.search(r'(?:₪\s*(\d+)|\b(\d+)\s*₪)\s*מתנה', title)
+    if m_gift:
+        val = int(m_gift.group(1) or m_gift.group(2))
+        return f"₪{val} מתנה", val, "gift", min_spend, min_spend_numeric
+
+    # 6. Percentage Discount (e.g. "20% הנחה", "עד 30% הנחה", "אקסטרה 15%")
+    m_pct = re.search(r'(\d+(?:\.\d+)?)\s*%', title)
+    if m_pct:
+        pct_val = int(float(m_pct.group(1)))
+        prefix = "עד " if "עד " in title else ("אקסטרה " if "אקסטרה" in title else "")
+        return f"{prefix}{pct_val}% הנחה", pct_val, "percent", min_spend, min_spend_numeric
+
+    # 7. Fixed Cash Discount (e.g. "₪50 הנחה", "200 ₪ הנחה", "5$ הנחה")
+    m_dollar = re.search(r'(\d+)\s*\$\s*הנחה', title)
+    if m_dollar:
+        val = int(m_dollar.group(1))
+        return f"${val} הנחה", val, "fixed_discount", min_spend, min_spend_numeric
+
+    m_nis = re.search(r'(?:₪\s*(\d+)|\b(\d+)\s*₪)\s*הנחה', title)
+    if m_nis:
+        val = int(m_nis.group(1) or m_nis.group(2))
+        prefix = "עד " if "עד " in title else ""
+        return f"{prefix}₪{val} הנחה", val, "fixed_discount", min_spend, min_spend_numeric
+
+    return "הטבה בלעדית", 0, "special", min_spend, min_spend_numeric
 
 
 def extract_coupon_code(desc_html, desc_text):
@@ -203,15 +327,75 @@ def extract_coupon_code(desc_html, desc_text):
     return "MASTERCARDAY"
 
 
-def extract_validity(desc_text):
-    """Extract validity badges like '10-11 בחודש', '10 בחודש בלבד', 'כל החודש'."""
-    if "10-11" in desc_text or "10 עד 11" in desc_text:
-        return "10-11 בחודש"
-    elif "במהלך כל ימות החודש" in desc_text or "כל החודש" in desc_text:
-        return "כל החודש"
-    elif "תקף ב-10 בחודש" in desc_text or "ב-10 בחודש בלבד" in desc_text or "ב-10 בחודש" in desc_text:
-        return "10 בחודש בלבד"
-    return "בכפוף לתקנון"
+def extract_validity_info(title, desc_text):
+    """
+    Extract validity code and human-readable badge text.
+    validity_code: '10_11th', 'all_month', 'only_10th'
+    """
+    text = f"{title} {desc_text}"
+
+    if "10-11" in text or "10 עד 11" in text or "ב-10-11 בחודש" in text:
+        return "10_11th", "10-11 בחודש"
+    elif "כל ימות החודש" in text or "במהלך כל החודש" in text or "במהלך כל ימות החודש" in text:
+        return "all_month", "כל החודש"
+    else:
+        return "only_10th", "10 בחודש בלבד"
+
+
+def parse_terms_bullets(title, desc_text, min_spend=None):
+    """
+    Transform raw legal description text into structured, easy-to-read bullet points.
+    Extracts Channel, Minimum Spend, Stacking/Coupons rules, and Restrictions.
+    """
+    bullets = []
+
+    # 1. Channel
+    channels = []
+    if "באתר" in title or "באתר" in desc_text:
+        channels.append("באתר אונליין")
+    if "באפליקציית" in title or "באפליקציה" in desc_text:
+        channels.append("באפליקציה")
+    if "בסניפי" in title or "בסניפים" in desc_text or "בחנויות" in title:
+        channels.append("בסניפים/חנויות")
+    if channels:
+        bullets.append(f"📍 ערוץ: {', '.join(channels)}")
+
+    # 2. Minimum Spend
+    if min_spend:
+        bullets.append(f"🏷️ מינימום קנייה: {min_spend}")
+
+    # 3. Stacking rules (כפל מבצעים / קופונים)
+    if "כולל כפל מבצעים, לא כולל כפל קופונים" in desc_text or "כולל כפל מבצעים לא כולל כפל קופונים" in desc_text:
+        bullets.append("🔄 כולל כפל מבצעים | ללא כפל קופונים")
+    elif "כולל כפל מבצעים" in desc_text or "כולל כפל הנחות" in desc_text:
+        bullets.append("✨ כולל כפל מבצעים והנחות")
+    elif "לא כולל כפל מבצעים" in desc_text or "ללא כפל מבצעים" in desc_text or "אין כפל מבצעים" in desc_text:
+        bullets.append("⚠️ ללא כפל מבצעים והנחות")
+    elif "לא כולל כפל קופונים" in desc_text:
+        bullets.append("⚠️ ללא כפל קופונים")
+
+    # 4. Usage limitations & exclusions
+    if "מימוש ארוחה אחת ללקוח" in desc_text or "מימוש אחד ללקוח" in desc_text or "לרכישה אחת ללקוח" in desc_text:
+        bullets.append("👤 מוגבל למימוש 1 ללקוח")
+    if "עד השעה 19:00" in desc_text:
+        bullets.append("⏰ תקף עד השעה 19:00 בלבד")
+    if "ללקוחות חדשים" in title or "למשתמש חדש" in desc_text:
+        bullets.append("🎉 מיועד ללקוחות חדשים בלבד")
+    if "לא כולל סלולר" in desc_text:
+        bullets.append("🚫 לא כולל סלולר וקונסולות")
+    if "על קטגוריית היין בלבד" in desc_text:
+        bullets.append("🍷 תקף על קטגוריית היין בלבד")
+    if "משלוח בלבד" in desc_text:
+        bullets.append("🛵 בהזמנת משלוח בלבד")
+    if "במלאי מוגבל" in desc_text or "מלאי ההטבות מוגבל" in desc_text or "עד גמר המלאי" in desc_text:
+        bullets.append("📦 מלאי ההטבות מוגבל")
+
+    # Fallback if nothing specific matched
+    if len(bullets) < 2:
+        bullets.append("💳 תקף למשלמים בכרטיס אשראי מאסטרקארד")
+        bullets.append("📄 בכפוף לתקנון המלא של בית העסק")
+
+    return bullets
 
 
 def determine_category(brand, title, description):
@@ -251,10 +435,8 @@ def parse_mastercard_day_html(html_content):
         desc_html = info.get("dc:description", "").strip()
         link = info.get("xdm:linkURL", "").strip()
 
-        # Ignore navigation or institutional teasers
-        if not title:
-            continue
-        if title in ["הטבות חדשות", "בכל 10 בחודש,    יום הטבות בלעדי למחזיקי כרטיס מאסטרקארד"]:
+        # Filter non-deal teasers
+        if not title or title in ["הטבות חדשות", "בכל 10 בחודש,    יום הטבות בלעדי למחזיקי כרטיס מאסטרקארד"]:
             continue
         if any(ign in link.lower() for ign in ["merchant-cloud", "economic-outlook", "pdp", "/business/"]):
             continue
@@ -274,15 +456,16 @@ def parse_mastercard_day_html(html_content):
         desc_text = desc_soup.get_text(separator=" ").strip()
         desc_text = re.sub(r'\s+', ' ', desc_text)
 
-        # Extract clean properties
+        # Standardized Brand & Pricing
         brand = extract_brand_name(title, link, alt_text)
-        discount_str, discount_num, discount_type = extract_discount(title, desc_text)
+        discount_label, discount_num, discount_type, min_spend, min_spend_numeric = extract_discount_and_pricing(title, desc_text)
         coupon_code = extract_coupon_code(desc_html, desc_text)
-        validity = extract_validity(desc_text)
+        validity_code, validity_text = extract_validity_info(title, desc_text)
+        terms_bullets = parse_terms_bullets(title, desc_text, min_spend)
         category = determine_category(brand, title, desc_text)
 
-        # Deduplicate deals by brand and discount
-        dedup_key = f"{brand.lower()}::{discount_str}"
+        # Deduplicate
+        dedup_key = f"{brand.lower()}::{discount_label}"
         if dedup_key in seen_keys:
             continue
         seen_keys.add(dedup_key)
@@ -291,14 +474,18 @@ def parse_mastercard_day_html(html_content):
             "id": tid or f"deal-{len(deals) + 1}",
             "brand": brand,
             "title": title,
-            "discount": discount_str,
+            "discount": discount_label,
             "discount_numeric": discount_num,
             "discount_type": discount_type,
+            "min_spend": min_spend,
+            "min_spend_numeric": min_spend_numeric,
             "coupon": coupon_code,
             "url": link,
             "image": img_url,
             "category": category,
-            "validity": validity,
+            "validity": validity_text,
+            "validity_code": validity_code,
+            "terms_bullets": terms_bullets,
             "description": desc_text,
             "updated_at": info.get("repo:modifyDate") or datetime.now(timezone.utc).isoformat()
         }
@@ -315,7 +502,6 @@ def save_catalog(deals, output_dir="data", source_url=DEFAULT_URL):
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
 
-    # Build unique categories list with "הכל" first
     unique_categories = ["הכל"]
     cat_set = set()
     for d in deals:
@@ -343,11 +529,12 @@ def save_catalog(deals, output_dir="data", source_url=DEFAULT_URL):
         json.dump(catalog_data, f, ensure_ascii=False, indent=2)
     print(f"[+] Saved JSON catalog to: {json_path} ({len(deals)} deals)")
 
-    # Save CSV (Excel-compatible with UTF-8 BOM)
+    # Save CSV
     csv_path = out_path / "deals.csv"
     fieldnames = [
         "id", "brand", "discount", "discount_numeric", "discount_type",
-        "coupon", "category", "validity", "title", "url", "image", "description"
+        "min_spend", "coupon", "category", "validity", "validity_code",
+        "title", "url", "image", "description"
     ]
 
     with open(csv_path, "w", encoding="utf-8-sig", newline="") as f:
@@ -376,7 +563,7 @@ def main():
         sys.exit(1)
 
     save_catalog(deals, output_dir=args.output_dir, source_url=args.url)
-    print("[*] Scraping completed successfully!")
+    print("[*] Scraping and normalization completed successfully!")
 
 
 if __name__ == "__main__":

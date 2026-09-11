@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mastercard Day | הטבות יום מאסטרקארד בישראל</title>
-  <meta name="description" content="קטלוג ההטבות, ההנחות וקודי הקופון המלא של יום מאסטרקארד בישראל בכל 10 בחודש. חיפוש מהיר, העתקת קופונים בלחיצה וסינון לפי קטגוריות." />
+  <meta name="description" content="קטלוג ההטבות, ההנחות וקודי הקופון המלא של יום מאסטרקארד בישראל בכל 10 בחודש. חיפוש מהיר, סינון לפי תוקף (היום/10 בחודש/כל החודש), תנאים מסודרים והעתקת קופונים בלחיצה." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2238%22 cy=%2250%22 r=%2232%22 fill=%22%23EB001B%22/><circle cx=%2262%22 cy=%2250%22 r=%2232%22 fill=%22%23F79E1B%22 opacity=%220.88%22/></svg>" />
 
   <!-- Tailwind CSS CDN -->
@@ -19,9 +19,9 @@
               red: '#EB001B',
               orange: '#FF5F00',
               yellow: '#F79E1B',
-              dark: '#0F172A',
-              cardDark: '#1E293B',
-              borderDark: '#334155'
+              dark: '#0B0F19',
+              cardDark: '#161F30',
+              borderDark: '#223048'
             }
           },
           fontFamily: {
@@ -47,7 +47,7 @@
       
       <!-- Brand & Title -->
       <div class="flex items-center gap-3">
-        <!-- Mastercard Overlapping Circles Logo -->
+        <!-- Mastercard Overlapping Circles Motif -->
         <div class="relative w-10 h-7 flex items-center shrink-0">
           <span class="w-6 h-6 rounded-full bg-[#EB001B] absolute right-0 shadow-sm"></span>
           <span class="w-6 h-6 rounded-full bg-[#F79E1B] absolute left-0 opacity-90 shadow-sm"></span>
@@ -92,7 +92,7 @@
   <!-- Main Content Container -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <!-- Hero Section with Countdown Banner & Stats -->
+    <!-- Hero Section with Live Countdown Banner & Calendar Context -->
     <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-850 to-slate-950 text-white p-6 sm:p-8 shadow-xl border border-slate-800">
       <div class="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-red-600/20 blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-24 -right-24 w-72 h-72 rounded-full bg-yellow-500/20 blur-3xl pointer-events-none"></div>
@@ -100,21 +100,21 @@
       <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
         <!-- Text & Status -->
         <div class="space-y-3 text-center lg:text-right max-w-xl">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-red-300 text-xs font-medium">
-            <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
-            <span id="countdown-status-text">מתכוננים ל-10 בחודש הבא</span>
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/90 border border-slate-700 text-slate-300 text-xs font-medium">
+            <span id="calendar-today-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="calendar-today-text">היום: טוען תאריך...</span>
           </div>
           <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            חגיגת המבצעים הגדולה של <span class="text-transparent bg-clip-text bg-gradient-to-l from-amber-400 to-red-500">מאסטרקארד דיי</span>
+            חגיגת המבצעים של <span class="text-transparent bg-clip-text bg-gradient-to-l from-amber-400 to-red-500">מאסטרקארד דיי</span>
           </h2>
-          <p class="text-sm sm:text-base text-slate-300">
+          <p id="calendar-status-explanation" class="text-sm sm:text-base text-slate-300 leading-relaxed">
             הנחות מיוחדות וקודי קופון בלעדיים למשלמים בכרטיס מאסטרקארד במותגים המובילים בארץ ובחו״ל.
           </p>
         </div>
 
         <!-- Live Countdown Timer -->
         <div class="flex flex-col items-center gap-2 shrink-0">
-          <div class="text-xs font-semibold tracking-wider text-slate-400 uppercase">ספירה לאחור ל-10 בחודש ב-10:00</div>
+          <div class="text-xs font-semibold tracking-wider text-slate-400 uppercase">ספירה לאחור ל-10 בחודש הבא ב-10:00</div>
           <div class="flex items-center gap-2 sm:gap-3" id="countdown-timer-container">
             <div class="countdown-box rounded-2xl p-3 sm:p-4 text-center min-w-[64px] sm:min-w-[76px] backdrop-blur-md">
               <span id="cd-days" class="block text-2xl sm:text-3xl font-black text-white">00</span>
@@ -145,18 +145,18 @@
           <div class="p-2 rounded-xl bg-slate-800 text-red-400"><i data-lucide="tag" class="w-4 h-4"></i></div>
           <div>
             <div id="stat-total-deals" class="text-base font-bold text-white">-</div>
-            <div class="text-[11px] text-slate-400">הטבות פעילות</div>
+            <div class="text-[11px] text-slate-400">הטבות בקטלוג</div>
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <div class="p-2 rounded-xl bg-slate-800 text-amber-400"><i data-lucide="percent" class="w-4 h-4"></i></div>
+          <div class="p-2 rounded-xl bg-slate-800 text-emerald-400"><i data-lucide="check-circle-2" class="w-4 h-4"></i></div>
           <div>
-            <div id="stat-max-discount" class="text-base font-bold text-white">-</div>
-            <div class="text-[11px] text-slate-400">הנחת שיא</div>
+            <div id="stat-active-today" class="text-base font-bold text-emerald-400">-</div>
+            <div class="text-[11px] text-slate-400">פעילות היום</div>
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <div class="p-2 rounded-xl bg-slate-800 text-emerald-400"><i data-lucide="key-round" class="w-4 h-4"></i></div>
+          <div class="p-2 rounded-xl bg-slate-800 text-amber-400"><i data-lucide="key-round" class="w-4 h-4"></i></div>
           <div>
             <div class="text-base font-bold text-white">MASTERCARDAY</div>
             <div class="text-[11px] text-slate-400">קוד קופון ראשי</div>
@@ -174,6 +174,8 @@
 
     <!-- Search & Filter Controls -->
     <section class="space-y-4">
+      
+      <!-- Top Search & Sort Bar -->
       <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
         
         <!-- Search Input -->
@@ -192,15 +194,16 @@
           </button>
         </div>
 
-        <!-- Sort Select & Results Badge -->
+        <!-- Sort Select & Results Count -->
         <div class="flex items-center gap-3 justify-between md:justify-end">
           <div class="text-xs text-slate-500 dark:text-slate-400">
-            נמצאו <span id="filtered-count" class="font-bold text-slate-900 dark:text-white">0</span> הטבות
+            מוצגות <span id="filtered-count" class="font-bold text-slate-900 dark:text-white">0</span> הטבות
           </div>
           <div class="relative">
-            <select id="sort-select" class="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 py-2 pl-8 pr-4 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer">
+            <select id="sort-select" class="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 py-2.5 pl-8 pr-4 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer">
               <option value="discount-desc">הנחה: מהגבוה לנמוך</option>
               <option value="brand-asc">שם מותג: א-ת</option>
+              <option value="min-spend-asc">מינימום קנייה: מהנמוך לגבוה</option>
               <option value="default">סדר מקורי</option>
             </select>
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-2 text-slate-400">
@@ -210,9 +213,26 @@
         </div>
       </div>
 
-      <!-- Category Filter Pills -->
-      <div id="category-pills-container" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-        <!-- Dynamically rendered pills -->
+      <!-- Validity Filter Row -->
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0 flex items-center gap-1.5">
+          <i data-lucide="calendar-check" class="w-3.5 h-3.5 text-red-500"></i>
+          <span>סינון לפי תוקף:</span>
+        </span>
+        <div id="validity-pills-container" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <!-- Rendered by app.js -->
+        </div>
+      </div>
+
+      <!-- Category Filter Row -->
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2 pt-1">
+        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0 flex items-center gap-1.5">
+          <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span>קטגוריות:</span>
+        </span>
+        <div id="category-pills-container" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <!-- Rendered by app.js -->
+        </div>
       </div>
     </section>
 
@@ -229,10 +249,11 @@
           <thead class="bg-slate-100/70 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-slate-700">
             <tr>
               <th class="px-4 py-3">מותג</th>
-              <th class="px-4 py-3">הנחה</th>
-              <th class="px-4 py-3">תיאור ההטבה</th>
+              <th class="px-4 py-3">סטטוס</th>
+              <th class="px-4 py-3">הנחה ומחיר</th>
+              <th class="px-4 py-3">מינימום קנייה</th>
               <th class="px-4 py-3">קוד קופון</th>
-              <th class="px-4 py-3">תוקף</th>
+              <th class="px-4 py-3">תנאים עיקריים</th>
               <th class="px-4 py-3 text-center">פעולות</th>
             </tr>
           </thead>
@@ -247,11 +268,11 @@
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-950/50 flex items-center justify-center text-red-600 dark:text-red-400">
           <i data-lucide="search-x" class="w-8 h-8"></i>
         </div>
-        <h3 class="text-lg font-bold text-slate-900 dark:text-white">לא נמצאו הטבות מתאימות</h3>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">נסה מונח חיפוש אחר או בחר בקטגוריה אחרת.</p>
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white">לא נמצאו הטבות מתאימות לסינון</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">נסה לאפס את הסינונים או לחפש מונח אחר.</p>
         <button id="reset-filters-btn" class="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-sm transition">
           <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-          איפוס סינונים
+          איפוס כל הסינונים
         </button>
       </div>
     </section>
@@ -261,7 +282,7 @@
   <footer class="mt-16 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
     <div class="max-w-7xl mx-auto px-4 space-y-2">
       <p>Mastercard Day הינו סימן מסחרי של חברת מאסטרקארד. מתן ההטבות והמוצרים הינם באחריות בתי העסק המשתתפים בלבד.</p>
-      <p>הנתונים מתעדכנים באופן אוטומטי שבועית ומקורם באתר הרשמי של Mastercard Israel.</p>
+      <p>הנתונים מתעדכנים באופן אוטומטי שבועית ובתאריכים ה-9 וה-10 בכל חודש מתוך האתר הרשמי של Mastercard Israel.</p>
       <div class="pt-2 flex items-center justify-center gap-4">
         <a href="https://www.mastercard.com/il/he/%D7%90%D7%99%D7%A9%D7%99/find-a-card/card-benefits/mastercard-day.html" target="_blank" class="hover:underline flex items-center gap-1">
           <span>עמוד המבצע המקורי</span>
@@ -283,4 +304,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
