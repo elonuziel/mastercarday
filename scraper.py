@@ -329,27 +329,38 @@ def extract_coupon_code(desc_html, desc_text):
 
 def extract_validity_info(title, desc_text):
     """
-    Extract validity code and human-readable badge text.
-    validity_code: '10_11th', 'all_month', 'only_10th'
+    Extract validity code, badge text, and ongoing secondary discount.
+    validity_code: '10_11th_and_all_month', '10_11th', 'all_month', 'only_10th'
     """
     text = f"{title} {desc_text}"
 
-    if "10-11" in text or "10 עד 11" in text or "ב-10-11 בחודש" in text:
-        return "10_11th", "10-11 בחודש"
+    # Check for dual/tiered benefit: 10-11th peak + ongoing discount all month (e.g. Airalo 20% on 10-11, 15% all month)
+    m_ongoing = re.search(r'(\d+%\s*הנחה|\d+%|\d+\s*₪\s*הנחה|₪\s*\d+\s*הנחה)\s*(?:תקפים\s*)?(?:במהלך\s*)?(?:ב)?כל\s*ימות\s*החודש', desc_text)
+    ongoing_discount = m_ongoing.group(1).strip() if m_ongoing else None
+
+    if ("10-11" in text or "10 עד 11" in text) and ongoing_discount:
+        return "10_11th_and_all_month", f"20% ב-10-11 | {ongoing_discount} כל החודש", ongoing_discount
+    elif "10-11" in text or "10 עד 11" in text or "ב-10-11 בחודש" in text:
+        return "10_11th", "10-11 בחודש", ongoing_discount
     elif "כל ימות החודש" in text or "במהלך כל החודש" in text or "במהלך כל ימות החודש" in text:
-        return "all_month", "כל החודש"
+        return "all_month", "כל החודש", ongoing_discount
     else:
-        return "only_10th", "10 בחודש בלבד"
+        return "only_10th", "10 בחודש בלבד", ongoing_discount
 
 
-def parse_terms_bullets(title, desc_text, min_spend=None):
+def parse_terms_bullets(title, desc_text, min_spend=None, ongoing_discount=None):
     """
     Transform raw legal description text into structured, easy-to-read bullet points.
-    Extracts Channel, Minimum Spend, Stacking/Coupons rules, and Restrictions.
+    Extracts Channel, Minimum Spend, Stacking/Coupons rules, Restrictions, and Tiered dates.
     """
     bullets = []
 
-    # 1. Channel
+    # 1. Tiered discount info (e.g. Airalo 15% all month long)
+    if ongoing_discount:
+        bullets.append(f"📅 {ongoing_discount} תקפים בכל שאר ימות החודש באותו קוד קופון")
+        bullets.append("⚡ הנחת שיא מוגדלת ב-10-11 בחודש")
+
+    # 2. Channel
     channels = []
     if "באתר" in title or "באתר" in desc_text:
         channels.append("באתר אונליין")
@@ -360,7 +371,7 @@ def parse_terms_bullets(title, desc_text, min_spend=None):
     if channels:
         bullets.append(f"📍 ערוץ: {', '.join(channels)}")
 
-    # 2. Minimum Spend
+    # 3. Minimum Spend
     if min_spend:
         bullets.append(f"🏷️ מינימום קנייה: {min_spend}")
 
@@ -460,8 +471,8 @@ def parse_mastercard_day_html(html_content):
         brand = extract_brand_name(title, link, alt_text)
         discount_label, discount_num, discount_type, min_spend, min_spend_numeric = extract_discount_and_pricing(title, desc_text)
         coupon_code = extract_coupon_code(desc_html, desc_text)
-        validity_code, validity_text = extract_validity_info(title, desc_text)
-        terms_bullets = parse_terms_bullets(title, desc_text, min_spend)
+        validity_code, validity_text, ongoing_discount = extract_validity_info(title, desc_text)
+        terms_bullets = parse_terms_bullets(title, desc_text, min_spend, ongoing_discount)
         category = determine_category(brand, title, desc_text)
 
         # Deduplicate
@@ -477,6 +488,7 @@ def parse_mastercard_day_html(html_content):
             "discount": discount_label,
             "discount_numeric": discount_num,
             "discount_type": discount_type,
+            "ongoing_discount": ongoing_discount,
             "min_spend": min_spend,
             "min_spend_numeric": min_spend_numeric,
             "coupon": coupon_code,
@@ -533,8 +545,8 @@ def save_catalog(deals, output_dir="data", source_url=DEFAULT_URL):
     csv_path = out_path / "deals.csv"
     fieldnames = [
         "id", "brand", "discount", "discount_numeric", "discount_type",
-        "min_spend", "coupon", "category", "validity", "validity_code",
-        "title", "url", "image", "description"
+        "ongoing_discount", "min_spend", "coupon", "category", "validity",
+        "validity_code", "title", "url", "image", "description"
     ]
 
     with open(csv_path, "w", encoding="utf-8-sig", newline="") as f:

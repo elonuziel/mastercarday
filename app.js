@@ -70,30 +70,58 @@
     handleHashNavigation();
   }
 
-  // ==========================================
-  // Calendar Context & Dynamic Validity Logic
-  // ==========================================
   function getDealValidityStatus(deal, date = new Date()) {
     const todayDay = date.getDate();
     const vCode = deal.validity_code || "only_10th";
 
-    // 1. All Month deals are always active today
+    // 1. Tiered Deals (e.g. Airalo: 20% on 10-11th, 15% throughout the entire month)
+    if (vCode === "10_11th_and_all_month") {
+      const ongoingText = deal.ongoing_discount || "15% הנחה";
+      if (todayDay === 10 || todayDay === 11) {
+        return {
+          status: "active_today",
+          label: "בתוקף היום! (20% שיא)",
+          subLabel: `${ongoingText} בשאר החודש`,
+          activeDiscount: deal.discount,
+          badgeClass: "bg-emerald-500/90 text-white border-emerald-400/50",
+          dotClass: "bg-emerald-300",
+          isExpired: false,
+          isTiered: true
+        };
+      } else {
+        // Active today with ongoing discount! Never expired!
+        return {
+          status: "active_today",
+          label: `בתוקף היום! (${ongoingText})`,
+          subLabel: "20% הנחה ב-10-11 בחודש",
+          activeDiscount: ongoingText,
+          badgeClass: "bg-emerald-600/90 text-white border-emerald-500/50",
+          dotClass: "bg-emerald-300",
+          isExpired: false,
+          isTiered: true
+        };
+      }
+    }
+
+    // 2. All Month deals are always active today
     if (vCode === "all_month") {
       return {
         status: "active_today",
-        label: "בתוקף היום!",
+        label: "בתוקף היום! (כל החודש)",
+        activeDiscount: deal.discount,
         badgeClass: "bg-emerald-500/90 text-white border-emerald-400/50",
         dotClass: "bg-emerald-300",
         isExpired: false
       };
     }
 
-    // 2. 10th-11th deals
+    // 3. 10th-11th deals
     if (vCode === "10_11th") {
       if (todayDay === 10 || todayDay === 11) {
         return {
           status: "active_today",
           label: "בתוקף היום! (10-11 בחודש)",
+          activeDiscount: deal.discount,
           badgeClass: "bg-emerald-500/90 text-white border-emerald-400/50",
           dotClass: "bg-emerald-300",
           isExpired: false
@@ -102,6 +130,7 @@
         return {
           status: "expired",
           label: "פג תוקף לחודש זה",
+          activeDiscount: deal.discount,
           badgeClass: "bg-slate-700/90 text-slate-300 border-slate-600",
           dotClass: "bg-slate-400",
           isExpired: true
@@ -110,6 +139,7 @@
         return {
           status: "upcoming",
           label: "החל מ-10-11 בחודש",
+          activeDiscount: deal.discount,
           badgeClass: "bg-amber-500/90 text-slate-950 border-amber-400",
           dotClass: "bg-amber-300",
           isExpired: false
@@ -117,11 +147,12 @@
       }
     }
 
-    // 3. 10th Only deals
+    // 4. 10th Only deals
     if (todayDay === 10) {
       return {
         status: "active_today",
         label: "בתוקף היום בלבד!",
+        activeDiscount: deal.discount,
         badgeClass: "bg-emerald-500/90 text-white border-emerald-400/50",
         dotClass: "bg-emerald-300",
         isExpired: false
@@ -130,6 +161,7 @@
       return {
         status: "expired",
         label: "פג תוקף לחודש זה",
+        activeDiscount: deal.discount,
         badgeClass: "bg-slate-700/90 text-slate-300 border-slate-600",
         dotClass: "bg-slate-400",
         isExpired: true
@@ -138,6 +170,7 @@
       return {
         status: "upcoming",
         label: "החל מה-10 בחודש",
+        activeDiscount: deal.discount,
         badgeClass: "bg-amber-500/90 text-slate-950 border-amber-400",
         dotClass: "bg-amber-300",
         isExpired: false
@@ -345,6 +378,10 @@
         count = state.allDeals.filter(d => getDealValidityStatus(d, now).status === "active_today").length;
       } else if (vf.id === "expired") {
         count = state.allDeals.filter(d => getDealValidityStatus(d, now).status === "expired").length;
+      } else if (vf.id === "10_11th") {
+        count = state.allDeals.filter(d => d.validity_code === "10_11th" || d.validity_code === "10_11th_and_all_month").length;
+      } else if (vf.id === "all_month") {
+        count = state.allDeals.filter(d => d.validity_code === "all_month" || d.validity_code === "10_11th_and_all_month").length;
       } else {
         count = state.allDeals.filter(d => d.validity_code === vf.id).length;
       }
@@ -432,7 +469,13 @@
       if (state.activeValidityFilter === "expired" && vStatus.status !== "expired") {
         return false;
       }
-      if (["only_10th", "10_11th", "all_month"].includes(state.activeValidityFilter) && deal.validity_code !== state.activeValidityFilter) {
+      if (state.activeValidityFilter === "only_10th" && deal.validity_code !== "only_10th") {
+        return false;
+      }
+      if (state.activeValidityFilter === "10_11th" && deal.validity_code !== "10_11th" && deal.validity_code !== "10_11th_and_all_month") {
+        return false;
+      }
+      if (state.activeValidityFilter === "all_month" && deal.validity_code !== "all_month" && deal.validity_code !== "10_11th_and_all_month") {
         return false;
       }
 
@@ -547,11 +590,18 @@
                     ${escapeHtml(deal.brand)}
                   </h3>
                   <!-- Discount Badge & Min Purchase Sub-Badge -->
-                  <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-red-600 text-white text-xs font-bold shadow-xs">
                       <i data-lucide="percent" class="w-3 h-3"></i>
                       <span>${escapeHtml(deal.discount)}</span>
                     </span>
+                    ${
+                      deal.ongoing_discount
+                        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-[11px] font-bold">
+                             <span>📅 ${escapeHtml(deal.ongoing_discount)} שאר החודש</span>
+                           </span>`
+                        : ''
+                    }
                     ${
                       deal.min_spend
                         ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800 text-[11px] font-semibold">
