@@ -44,3 +44,4 @@ jobs:
             git commit -m "Automated update of Mastercard Day catalog [skip ci]"
             git push
           fi
+
