@@ -2,7 +2,7 @@
   "metadata": {
     "title": "הטבות יום מאסטרקארד | Mastercard Day Israel",
     "source": "https://www.mastercard.com/il/he/%D7%90%D7%99%D7%A9%D7%99/find-a-card/card-benefits/mastercard-day.html",
-    "last_updated": "2026-09-13T11:36:49.734906+00:00",
+    "last_updated": "2026-09-20T11:08:09.056131+00:00",
     "total_deals": 44,
     "categories": [
       "הכל",
@@ -22,7 +22,7 @@
       "discount": "₪200 הנחה",
       "discount_numeric": 200,
       "discount_type": "fixed_discount",
-      "ongoing_discount": "200 ₪ הנחה בקניה מעל 2000 ₪",
+      "ongoing_discount": null,
       "min_spend": "2000 ₪",
       "min_spend_numeric": 2000,
       "coupon": "MASTERCARDAY",
@@ -32,37 +32,7 @@
       "validity": "10 בחודש בלבד",
       "validity_code": "only_10th",
       "valid_days": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20,
-        21,
-        22,
-        23,
-        24,
-        25,
-        26,
-        27,
-        28,
-        29,
-        30,
-        31
+        10
       ],
       "terms_bullets": [
         "📍 ערוץ: באתר אונליין, בסניפים/חנויות",
@@ -106,7 +76,7 @@
       "discount": "1+1 מתנה",
       "discount_numeric": 100,
       "discount_type": "one_plus_one",
-      "ongoing_discount": "1+1 על כרית טמפור Prima Smart Cool",
+      "ongoing_discount": null,
       "min_spend": null,
       "min_spend_numeric": 0,
       "coupon": "MASTERCARDAY",
@@ -116,37 +86,8 @@
       "validity": "10-11 בחודש",
       "validity_code": "10_11th",
       "valid_days": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
         10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20,
-        21,
-        22,
-        23,
-        24,
-        25,
-        26,
-        27,
-        28,
-        29,
-        30,
-        31
+        11
       ],
       "terms_bullets": [
         "📍 ערוץ: באתר אונליין, בסניפים/חנויות",
@@ -162,7 +103,7 @@
       "discount": "מחיר מבצע: ₪84",
       "discount_numeric": 84,
       "discount_type": "special_price",
-      "ongoing_discount": "₪84 על קילו גלידה + 2 רטבים מתנה",
+      "ongoing_discount": null,
       "min_spend": null,
       "min_spend_numeric": 0,
       "coupon": "MASTERCARDAY",
@@ -172,37 +113,7 @@
       "validity": "10 בחודש בלבד",
       "validity_code": "only_10th",
       "valid_days": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20,
-        21,
-        22,
-        23,
-        24,
-        25,
-        26,
-        27,
-        28,
-        29,
-        30,
-        31
+        10
       ],
       "terms_bullets": [
         "📍 ערוץ: באפליקציה",
@@ -244,10 +155,10 @@
       "discount": "₪50 הנחה",
       "discount_numeric": 50,
       "discount_type": "fixed_discount",
-      "ongoing_discount": "₪50 הנחה ברכישת ₪250 ומעלה",
+      "ongoing_discount": "₪50 הנחה",
       "min_spend": "₪250",
       "min_spend_numeric": 250,
-      "coupon": "MASTERCARDAY9",
+      "coupon": "MASTERCARDAY10",
       "url": "https://www.terminalx.com/women",
       "image": "https://www.mastercard.com/content/dam/mccom/eu/israel/mastercard-day/terminal-x-promo-image_1280x720.jpg",
       "category": "אופנה ולייף סטייל",
@@ -291,8 +202,8 @@
         "🏷️ מינימום קנייה: ₪250",
         "🔄 כולל כפל מבצעים | ללא כפל קופונים"
       ],
-      "description": "המבצע תקף ב- 10 בחודש בלבד ובכפוף לתקנון המלא. כולל כפל מבצעים, לא כולל כפל קופונים. קוד קופון: MASTERCARDAY9 לתקנון",
-      "updated_at": "2026-09-07T10:38:45Z"
+      "description": "המבצע תקף ב- 10 בחודש בלבד ובכפוף לתקנון המלא. כולל כפל מבצעים, לא כולל כפל קופונים. קוד קופון: MASTERCARDAY10 לתקנון",
+      "updated_at": "2026-09-15T12:31:02Z"
     },
     {
       "id": "teaser-40e9f8cc7d",
@@ -385,7 +296,7 @@
       "ongoing_discount": null,
       "min_spend": "₪200",
       "min_spend_numeric": 200,
-      "coupon": "MASTERCARDAY09",
+      "coupon": "MASTERCARDAY10",
       "url": "https://www.wineroute.co.il/product-category/יין/",
       "image": "https://www.mastercard.com/content/dam/mccom/eu/israel/mastercard-day/Winerouth-promo-image_1280x720.jpg",
       "category": "קולינריה ומסעדות",
@@ -400,8 +311,8 @@
         "⚠️ ללא כפל הנחות",
         "🍷 תקף על קטגוריית היין בלבד"
       ],
-      "description": "*תקף על קטגוריית היין בלבד. משלוחים חינם מעל 300 ש”ח לכל הארץ. תקף ב-10 בחודש בלבד. תקף על כל האתר בלבד. ההנחה תינתן ברכישת 200 ש”ח ומעלה (לא כולל עלות המשלוח, על קטגוריית היין בלבד). לא כולל כפל הנחות וקופונים. מתן ההטבה וטיב המוצרים ו\\או השירותים באחריות בית העסק בלבד. בכפוף לתקנון המלא. קוד קופון: MASTERCARDAY09 לתקנון",
-      "updated_at": "2026-08-27T06:45:48Z"
+      "description": "*תקף על קטגוריית היין בלבד. משלוחים חינם מעל 300 ש”ח לכל הארץ. תקף ב-10 בחודש בלבד. תקף על כל האתר בלבד. ההנחה תינתן ברכישת 200 ש”ח ומעלה (לא כולל עלות המשלוח, על קטגוריית היין בלבד). לא כולל כפל הנחות וקופונים. מתן ההטבה וטיב המוצרים ו\\או השירותים באחריות בית העסק בלבד. בכפוף לתקנון המלא. קוד קופון: MASTERCARDAY10 לתקנון",
+      "updated_at": "2026-09-15T12:36:16Z"
     },
     {
       "id": "teaser-cc4f81dcef",
@@ -429,33 +340,6 @@
       ],
       "description": "לקוחות קיימים נהנים מ-₪10 הנחה בהזמנה בכל 10 בחודש. בנוסף צבירת עלות המשלוח לארנק במאות מסעדות משתתפות וקאשבק במאות מסעדות משתתפות. קופון NEWMASTERCARD מוגבל למימוש חד פעמי למשתמש חדש. קופון MASTERCARDAY הינו ללא הגבלת מימושים. קוד קופון ללקוחות חדשים: NEWMASTERCARD קוד קופון ללקוחות קיימים: MASTERCARDAY לתקנון",
       "updated_at": "2026-05-26T12:42:54Z"
-    },
-    {
-      "id": "teaser-5324e3dfa5",
-      "brand": "EV-EDGE",
-      "title": "₪25 מתנה לטעינה חשמלית ברשת EV-EDGE",
-      "discount": "₪25 מתנה",
-      "discount_numeric": 25,
-      "discount_type": "gift",
-      "ongoing_discount": null,
-      "min_spend": null,
-      "min_spend_numeric": 0,
-      "coupon": "MASTERCARDAY",
-      "url": "https://play.google.com/store/apps/details?id=il.evedge.evedge",
-      "image": "https://www.mastercard.com/content/dam/mccom/eu/israel/mastercard-day/evedge-promo-image_1280x720.jpg",
-      "category": "חשמל וטכנולוגיה",
-      "validity": "10 בחודש בלבד",
-      "validity_code": "only_10th",
-      "valid_days": [
-        10
-      ],
-      "terms_bullets": [
-        "📍 ערוץ: באתר אונליין",
-        "💳 תקף למשלמים בכרטיס אשראי מאסטרקארד",
-        "📄 בכפוף לתקנון המלא של בית העסק"
-      ],
-      "description": "תקף ברכישת שובר בעלות של ₪175 באפליקציית EV-EDGE ב-10 בחודש בלבד. מימוש השובר ללא הגבלת זמן. בתוקף למשלמים בכרטיס מאסטרקארד בלבד. בכפוף לתקנון המלא באתר מאסטרקארד דיי. ט.ל.ח אופן המימוש: מפורט התקנון לתקנון",
-      "updated_at": "2026-05-26T09:02:26Z"
     },
     {
       "id": "teaser-47f769a4eb",
@@ -765,7 +649,7 @@
       "min_spend_numeric": 0,
       "coupon": "MASTERCARDAY",
       "url": "https://www.minene.net/clothing?utm_source=mastercarday&utm_medium=10.2.25",
-      "image": "https://www.mastercard.com/content/dam/mccom/eu/israel/mastercard-day/minene%20sep%20.png",
+      "image": "https://www.mastercard.com/content/dam/mccom/eu/israel/mastercard-day/minene%20oct%20plus%20logo.jpg",
       "category": "אופנה ולייף סטייל",
       "validity": "10 בחודש בלבד",
       "validity_code": "only_10th",
@@ -777,7 +661,7 @@
         "⚠️ ללא כפל קופונים"
       ],
       "description": "כולל כפל מבצעים. ללא כפל קופונים. המבצע תקף ב-10 בכל חודש החל מהשעה 00:00 ועד השעה 23:59 באותו היום. תקף באתר בלבד. התמונה להמחשה בלבד. מתן ההטבה וטיב המוצרים ו\\או השירותים באחריות בית העסק בלבד. בכפוף לתקנון המלא. קוד קופון: MASTERCARDAY לתקנון",
-      "updated_at": "2026-08-31T09:12:04Z"
+      "updated_at": "2026-09-16T13:31:14Z"
     },
     {
       "id": "teaser-2feab2e5e9",
@@ -1072,8 +956,8 @@
         "⚠️ ללא כפל מבצעים",
         "📦 מלאי ההטבות מוגבל"
       ],
-      "description": "גובה קופון מקסימלי - $10. לא כולל דמי משלוח ועמלות אחרות. ללא כפל מבצעים. תקף החל מהשעה 10:00 בבוקר ב-10 בחודש ועד גמר המלאי. מימוש אחד למשתמש, למשלוח לישראל בלבד. כמות הקופונים מוגבלת. קוד קופון: MASTERCARDAY לתקנון",
-      "updated_at": "2026-05-26T12:52:36Z"
+      "description": "גובה קופון מקסימלי - $10. לא כולל דמי משלוח ועמלות אחרות. ללא כפל מבצעים. תקף החל מהשעה 10:00 בבוקר ב-10 בחודש ועד גמר המלאי- מלאי הקופונים מתחלק בין שבת למוצאי שבת. מימוש אחד למשתמש, למשלוח לישראל בלבד. כמות הקופונים מוגבלת. קוד קופון החל מ-10:00 בבוקר ועד 20:00: MASTERCARDAY קוד קופון החל מ-20:01 ועד 23:59: MASTERCARD לתקנון",
+      "updated_at": "2026-09-15T12:37:48Z"
     },
     {
       "id": "teaser-a59fc21f2e",
@@ -1275,7 +1159,7 @@
       "ongoing_discount": null,
       "min_spend": null,
       "min_spend_numeric": 0,
-      "coupon": "MASTERCARDAY9",
+      "coupon": "MASTERCARDAY10",
       "url": "https://rebar.co.il/store/",
       "image": "https://www.mastercard.com/content/dam/mccom/eu/israel/mastercard-day/rebar-promo-image_1280x720.jpg",
       "category": "קולינריה ומסעדות",
@@ -1289,8 +1173,8 @@
         "💳 תקף למשלמים בכרטיס אשראי מאסטרקארד",
         "📄 בכפוף לתקנון המלא של בית העסק"
       ],
-      "description": "תקף למשלמים בכרטיס אשראי מאסטרקארד. תקף ב-10 בחודש בסניפי rebar בהזנת קוד קופון. ההטבה זמינה לחברי מועדון rebar בהזנת קוד קופון. בכפוף לפירוט התנאים המלאים בתקנון קוד קופון: MASTERCARDAY9 לתקנון",
-      "updated_at": "2026-08-27T07:36:08Z"
+      "description": "תקף למשלמים בכרטיס אשראי מאסטרקארד. תקף ב-10 בחודש בסניפי rebar בהזנת קוד קופון. ההטבה זמינה לחברי מועדון rebar בהזנת קוד קופון. בכפוף לפירוט התנאים המלאים בתקנון קוד קופון: MASTERCARDAY10 לתקנון",
+      "updated_at": "2026-09-15T12:30:18Z"
     },
     {
       "id": "teaser-a98aed8c83",
@@ -1342,8 +1226,8 @@
         "🏷️ מינימום קנייה: 35$",
         "📦 מלאי ההטבות מוגבל"
       ],
-      "description": "מלאי קופונים מוגבל. תקף ב-10 בחודש בלבד החל מהשעה 10:00 בבוקר ועד חצות \\ עד גמר המלאי, המוקדם מבניהם. תקף למשלמים בכרטיס אשראי מאסטרקארד בלבד. בכפוף לתנאים המלאים בתקנון. קוד קופון: MASTERCARDAY לתקנון",
-      "updated_at": "2026-08-27T10:37:16Z"
+      "description": "מלאי קופונים מוגבל. תקף ב-10 בחודש בלבד החל מהשעה 10:00 בבוקר ועד חצות \\ עד גמר המלאי, המוקדם מבניהם - מלאי הקופונים מתחלק בין שבת למוצאי שבת. תקף למשלמים בכרטיס אשראי מאסטרקארד בלבד. בכפוף לתנאים המלאים בתקנון. קוד קופון החל מ-10:00 בבוקר ועד 20:00: MASTERCARDAY קוד קופון החל מ-20:01 ועד 23:59: MASTERCARD לתקנון",
+      "updated_at": "2026-09-15T12:29:31Z"
     },
     {
       "id": "teaser-52e1302192",
@@ -1401,6 +1285,33 @@
       ],
       "description": "ההטבה תקפה למזמינים בלינק היעודי בלבד ובתשלום בכרטיס מאסטרקארד. ההטבה תקפה בכל ימות החודש. יש לעקוב אחר השלבים המופיעים בתקנון המלא על מנת להנות מההטבה. קוד קופון: MASTERCARDAY לתקנון",
       "updated_at": "2026-05-26T12:54:02Z"
+    },
+    {
+      "id": "teaser-5324e3dfa5",
+      "brand": "EV-EDGE",
+      "title": "10 קוט\"ש מתנה לטעינה חשמלית ברשת EV-EDGE",
+      "discount": "הטבה בלעדית",
+      "discount_numeric": 0,
+      "discount_type": "special",
+      "ongoing_discount": null,
+      "min_spend": null,
+      "min_spend_numeric": 0,
+      "coupon": "MASTERCARDAY",
+      "url": "https://play.google.com/store/apps/details?id=il.evedge.evedge",
+      "image": "https://www.mastercard.com/content/dam/mccom/eu/israel/mastercard-day/evedge-promo-image_1280x720.jpg",
+      "category": "חשמל וטכנולוגיה",
+      "validity": "10 בחודש בלבד",
+      "validity_code": "only_10th",
+      "valid_days": [
+        10
+      ],
+      "terms_bullets": [
+        "📍 ערוץ: באתר אונליין",
+        "💳 תקף למשלמים בכרטיס אשראי מאסטרקארד",
+        "📄 בכפוף לתקנון המלא של בית העסק"
+      ],
+      "description": "רוכשים חבילת טעינה ב10 בחודש בעלות 175 ש\"ח באפליקציית EV-Edge ומקבלים בנוסף 10 קוט\"ש במתנה למימוש בטעינה הבאה שלכם. בתוקף למשלמים בכרטיס מאסטרקארד בלבד. בכפוף לתקנון המלא באתר מאסטרקארד דיי. ט.ל.ח אופן המימוש: מפורט התקנון לתקנון",
+      "updated_at": "2026-09-15T07:13:09Z"
     }
   ]
 }
