@@ -67,4 +67,4 @@ When a rate limit (HTTP `429 Too Many Requests`) is returned, Groq supplies the 
 3. **Handle 429 Gracefully**:
    Read `Retry-After` header or parse `"Please try again in X.Xs"` from the response body, sleep for that interval, and retry (up to 3 times).
 4. **Active Model Selection**:
-   Use `qwen/qwen3.8-27b` (default) or `openai/gpt-oss-20b`. Avoid `llama-3.1-8b-instant` unless on an Enterprise tier agreement.
+   Use `openai/gpt-oss-20b` (recommended default, 8,000 TPM with no 1,000 OTPM bottleneck, 1,000 T/s speed) or `qwen/qwen3.8-27b`. Avoid `llama-3.1-8b-instant` unless on an Enterprise tier agreement.

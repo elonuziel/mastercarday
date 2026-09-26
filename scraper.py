@@ -177,8 +177,8 @@ def parse_arguments():
     )
     parser.add_argument(
         "--groq-model",
-        default=os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b"),
-        help="Groq model name to use (default: 'qwen/qwen3.8-27b')"
+        default=os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b"),
+        help="Groq model name to use (default: 'openai/gpt-oss-20b')"
     )
     return parser.parse_args()
 
@@ -600,7 +600,7 @@ def save_catalog(deals, output_dir="data", source_url=DEFAULT_URL):
     return json_path, csv_path
 
 
-def enrich_deals_with_groq(deals, api_key, model="qwen/qwen3.8-27b"):
+def enrich_deals_with_groq(deals, api_key, model="openai/gpt-oss-20b"):
     """
     Optional AI verification using Groq API.
     Refines valid_days, ongoing_discount, and terms for deals with complex legalese.
@@ -637,7 +637,7 @@ def enrich_deals_with_groq(deals, api_key, model="qwen/qwen3.8-27b"):
             f"Deals:\n{json.dumps(items_payload, ensure_ascii=False)}"
         )
         
-        max_output_tokens = min(200, len(chunk) * 85)
+        max_output_tokens = max(350, min(600, len(chunk) * 150))
         max_retries = 3
 
         for attempt in range(1, max_retries + 1):
@@ -694,9 +694,15 @@ def enrich_deals_with_groq(deals, api_key, model="qwen/qwen3.8-27b"):
                     pass
 
                 if ("model_not_found" in err_body or e.code == 404) and attempt < max_retries:
-                    fallback_model = "openai/gpt-oss-20b" if model == "qwen/qwen3.8-27b" else "qwen/qwen3.8-27b"
+                    fallback_model = "qwen/qwen3.8-27b" if "gpt-oss" in model else "openai/gpt-oss-20b"
                     print(f"[*] Groq model '{model}' not found/accessible. Automatically falling back to '{fallback_model}'...")
                     model = fallback_model
+                    continue
+
+                if "json_validate_failed" in err_body and attempt < max_retries:
+                    max_output_tokens = max(500, max_output_tokens + 250)
+                    print(f"[*] Groq JSON generation truncated. Increasing max_tokens to {max_output_tokens} and retrying (attempt {attempt}/{max_retries})...")
+                    time.sleep(1.0)
                     continue
 
                 if e.code == 429 and attempt < max_retries:
