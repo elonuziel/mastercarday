@@ -425,10 +425,16 @@
 
     if (metadata.last_updated) {
       const date = new Date(metadata.last_updated);
-      elements.statLastUpdated.textContent = date.toLocaleDateString("he-IL", {
+      const hebrewDate = date.toLocaleDateString("he-IL", {
         day: "2-digit",
-        month: "2-digit"
+        month: "2-digit",
+        year: "numeric"
       });
+      const hebrewTime = date.toLocaleTimeString("he-IL", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+      elements.statLastUpdated.textContent = `${hebrewDate} בשעה ${hebrewTime}`;
     }
   }
 
