@@ -177,8 +177,8 @@ def parse_arguments():
     )
     parser.add_argument(
         "--groq-model",
-        default=os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant"),
-        help="Groq model name to use (default: 'llama-3.1-8b-instant')"
+        default=os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b"),
+        help="Groq model name to use (default: 'qwen/qwen3.8-27b')"
     )
     return parser.parse_args()
 
@@ -600,7 +600,7 @@ def save_catalog(deals, output_dir="data", source_url=DEFAULT_URL):
     return json_path, csv_path
 
 
-def enrich_deals_with_groq(deals, api_key, model="llama-3.1-8b-instant"):
+def enrich_deals_with_groq(deals, api_key, model="qwen/qwen3.8-27b"):
     """
     Optional AI verification using Groq API.
     Refines valid_days, ongoing_discount, and terms for deals with complex legalese.
@@ -620,7 +620,7 @@ def enrich_deals_with_groq(deals, api_key, model="llama-3.1-8b-instant"):
     if not candidates:
         return deals
 
-    chunk_size = 4
+    chunk_size = 2
     for i in range(0, len(candidates), chunk_size):
         chunk = candidates[i:i + chunk_size]
         items_payload = [
@@ -637,7 +637,7 @@ def enrich_deals_with_groq(deals, api_key, model="llama-3.1-8b-instant"):
             f"Deals:\n{json.dumps(items_payload, ensure_ascii=False)}"
         )
         
-        max_output_tokens = min(350, len(chunk) * 85)
+        max_output_tokens = min(200, len(chunk) * 85)
         max_retries = 3
 
         for attempt in range(1, max_retries + 1):
@@ -692,6 +692,12 @@ def enrich_deals_with_groq(deals, api_key, model="llama-3.1-8b-instant"):
                     err_body = e.read().decode("utf-8")
                 except Exception:
                     pass
+
+                if ("model_not_found" in err_body or e.code == 404) and attempt < max_retries:
+                    fallback_model = "openai/gpt-oss-20b" if model == "qwen/qwen3.8-27b" else "qwen/qwen3.8-27b"
+                    print(f"[*] Groq model '{model}' not found/accessible. Automatically falling back to '{fallback_model}'...")
+                    model = fallback_model
+                    continue
 
                 if e.code == 429 and attempt < max_retries:
                     retry_header = e.headers.get("Retry-After")
