@@ -175,6 +175,11 @@ def parse_arguments():
         default=os.environ.get("GROQ_API_KEY"),
         help="Optional Groq API key for AI validation of complex Hebrew terms"
     )
+    parser.add_argument(
+        "--groq-model",
+        default=os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant"),
+        help="Groq model name to use (default: 'llama-3.1-8b-instant')"
+    )
     return parser.parse_args()
 
 
@@ -595,7 +600,7 @@ def save_catalog(deals, output_dir="data", source_url=DEFAULT_URL):
     return json_path, csv_path
 
 
-def enrich_deals_with_groq(deals, api_key):
+def enrich_deals_with_groq(deals, api_key, model="llama-3.1-8b-instant"):
     """
     Optional AI verification using Groq API.
     Refines valid_days, ongoing_discount, and terms for deals with complex legalese.
@@ -604,8 +609,9 @@ def enrich_deals_with_groq(deals, api_key):
         return deals
 
     import urllib.request
+    import urllib.error
 
-    print("[*] Groq API key detected. Running AI verification & enrichment on complex terms...")
+    print(f"[*] Groq API key detected. Running AI verification & enrichment using model '{model}'...")
     # Find deals with complex Hebrew dates/stacking terms
     candidates = [
         d for d in deals
@@ -630,50 +636,81 @@ def enrich_deals_with_groq(deals, api_key):
             "- double_discounts_ok: boolean (false if text says לא כולל כפל מבצעים)\n\n"
             f"Deals:\n{json.dumps(items_payload, ensure_ascii=False)}"
         )
-        try:
-            req = urllib.request.Request(
-                "https://api.groq.com/openai/v1/chat/completions",
-                data=json.dumps({
-                    "model": "qwen/qwen3.8-27b",
-                    "messages": [{"role": "user", "content": prompt}],
-                    "response_format": {"type": "json_object"},
-                    "max_tokens": 800
-                }).encode("utf-8"),
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json",
-                    "User-Agent": "Mozilla/5.0"
-                }
-            )
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                result_json = json.loads(data["choices"][0]["message"]["content"])
-                results_map = {}
-                if isinstance(result_json, list):
-                    for item in result_json:
-                        if isinstance(item, dict) and "id" in item:
-                            results_map[item["id"]] = item
-                elif isinstance(result_json, dict):
-                    for k, v in result_json.items():
-                        if isinstance(v, dict) and "valid_days" in v:
-                            results_map[k] = v
-                        elif isinstance(v, list):
-                            for sub in v:
-                                if isinstance(sub, dict) and "id" in sub:
-                                    results_map[sub["id"]] = sub
+        
+        max_output_tokens = min(350, len(chunk) * 85)
+        max_retries = 3
 
-                for d in chunk:
-                    if d["id"] in results_map:
-                        res = results_map[d["id"]]
-                        if res.get("ongoing_discount"):
-                            d["ongoing_discount"] = res["ongoing_discount"]
-                            d["valid_days"] = list(range(1, 32))
-                        elif "valid_days" in res and isinstance(res["valid_days"], list) and len(res["valid_days"]) > 0:
-                            d["valid_days"] = res["valid_days"]
-            time.sleep(0.5)
-        except Exception as e:
-            print(f"[!] Groq enrichment notice: {e} (keeping rule-based values)")
-            break
+        for attempt in range(1, max_retries + 1):
+            try:
+                req = urllib.request.Request(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    data=json.dumps({
+                        "model": model,
+                        "messages": [{"role": "user", "content": prompt}],
+                        "response_format": {"type": "json_object"},
+                        "max_tokens": max_output_tokens
+                    }).encode("utf-8"),
+                    headers={
+                        "Authorization": f"Bearer {api_key}",
+                        "Content-Type": "application/json",
+                        "User-Agent": "Mozilla/5.0"
+                    }
+                )
+                with urllib.request.urlopen(req, timeout=20) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    result_json = json.loads(data["choices"][0]["message"]["content"])
+                    results_map = {}
+                    if isinstance(result_json, list):
+                        for item in result_json:
+                            if isinstance(item, dict) and "id" in item:
+                                results_map[item["id"]] = item
+                    elif isinstance(result_json, dict):
+                        for k, v in result_json.items():
+                            if isinstance(v, dict) and "valid_days" in v:
+                                results_map[k] = v
+                            elif isinstance(v, list):
+                                for sub in v:
+                                    if isinstance(sub, dict) and "id" in sub:
+                                        results_map[sub["id"]] = sub
+
+                    for d in chunk:
+                        if d["id"] in results_map:
+                            res = results_map[d["id"]]
+                            if res.get("ongoing_discount"):
+                                d["ongoing_discount"] = res["ongoing_discount"]
+                                d["valid_days"] = list(range(1, 32))
+                            elif "valid_days" in res and isinstance(res["valid_days"], list) and len(res["valid_days"]) > 0:
+                                d["valid_days"] = res["valid_days"]
+
+                # Chunk processed successfully; small delay to prevent rapid bursting
+                time.sleep(1.0)
+                break
+
+            except urllib.error.HTTPError as e:
+                err_body = ""
+                try:
+                    err_body = e.read().decode("utf-8")
+                except Exception:
+                    pass
+
+                if e.code == 429 and attempt < max_retries:
+                    retry_header = e.headers.get("Retry-After")
+                    wait_time = float(retry_header) if retry_header else None
+                    if wait_time is None and err_body:
+                        m = re.search(r"try again in ([\d\.]+)s", err_body)
+                        if m:
+                            wait_time = float(m.group(1)) + 1.0
+                    if wait_time is None:
+                        wait_time = 25.0
+                    print(f"[*] Groq rate limit (429) hit. Waiting {wait_time:.1f}s before retry (attempt {attempt}/{max_retries})...")
+                    time.sleep(wait_time)
+                else:
+                    detail = f": {err_body}" if err_body else f": {e}"
+                    print(f"[!] Groq enrichment notice for chunk {i // chunk_size + 1}{detail} (keeping rule-based values)")
+                    break
+            except Exception as e:
+                print(f"[!] Groq enrichment notice for chunk {i // chunk_size + 1}: {e} (keeping rule-based values)")
+                break
 
     print("[+] AI enrichment check complete.")
     return deals
@@ -696,7 +733,7 @@ def main():
 
     groq_api_key = args.groq_api_key or os.environ.get("GROQ_API_KEY")
     if groq_api_key:
-        deals = enrich_deals_with_groq(deals, groq_api_key)
+        deals = enrich_deals_with_groq(deals, groq_api_key, model=args.groq_model)
 
     save_catalog(deals, output_dir=args.output_dir, source_url=args.url)
     print("[*] Scraping and normalization completed successfully!")
