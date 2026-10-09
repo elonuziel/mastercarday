@@ -2,7 +2,7 @@
   "metadata": {
     "title": "הטבות יום מאסטרקארד | Mastercard Day Israel",
     "source": "https://www.mastercard.com/il/he/%D7%90%D7%99%D7%A9%D7%99/find-a-card/card-benefits/mastercard-day.html",
-    "last_updated": "2026-10-04T08:12:31.853686+00:00",
+    "last_updated": "2026-10-09T12:35:56.870103+00:00",
     "total_deals": 44,
     "categories": [
       "הכל",
@@ -70,8 +70,8 @@
         "🔄 כולל כפל מבצעים | ללא כפל קופונים",
         "🚫 לא כולל סלולר וקונסולות"
       ],
-      "description": "תקף ב- 10 בחודש בלבד באתר ובסניפי עולם הקולנוע והחשמל. *לא כולל סלולר ,קונסולות ומצלמות דיגיטליות. כולל כפל מבצעים, לא כולל כפל קופונים והטבות. . מתן ההטבה וטיב המוצרים ו\\או השירותים באחריות בית העסק בלבד. בכפוף לתקנון המלא. קוד קופון לאתר: MASTERCARDAY קוד קופון לסניפים: MASTERCARDCWC לתקנון",
-      "updated_at": "2026-09-07T08:52:12Z"
+      "description": "תקף בין התאריכים 9 לאוקטובר ועד 11 לאוקטובר 2026, באתר ובסניפי עולם הקולנוע והחשמל. *לא כולל סלולר ,קונסולות ומצלמות דיגיטליות. כולל כפל מבצעים, לא כולל כפל קופונים והטבות. . מתן ההטבה וטיב המוצרים ו\\או השירותים באחריות בית העסק בלבד. בכפוף לתקנון המלא. קוד קופון לאתר: MASTERCARDAY קוד קופון לסניפים: MASTERCARDCWC לתקנון",
+      "updated_at": "2026-10-06T10:44:13Z"
     },
     {
       "id": "teaser-66f0b4c242",
@@ -214,7 +214,7 @@
       "discount": "₪50 הנחה",
       "discount_numeric": 50,
       "discount_type": "fixed_discount",
-      "ongoing_discount": null,
+      "ongoing_discount": "₪50 הנחה",
       "min_spend": "₪250",
       "min_spend_numeric": 250,
       "coupon": "MASTERCARDAY10",
@@ -224,7 +224,37 @@
       "validity": "10 בחודש בלבד",
       "validity_code": "only_10th",
       "valid_days": [
-        10
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
       ],
       "terms_bullets": [
         "📍 ערוץ: באתר אונליין",
@@ -429,6 +459,33 @@
       ],
       "description": "לקוחות קיימים נהנים מ-₪10 הנחה בהזמנה בכל 10 בחודש. בנוסף צבירת עלות המשלוח לארנק במאות מסעדות משתתפות וקאשבק במאות מסעדות משתתפות. קופון NEWMASTERCARD מוגבל למימוש חד פעמי למשתמש חדש. קופון MASTERCARDAY הינו ללא הגבלת מימושים. קוד קופון ללקוחות חדשים: NEWMASTERCARD קוד קופון ללקוחות קיימים: MASTERCARDAY לתקנון",
       "updated_at": "2026-05-26T12:42:54Z"
+    },
+    {
+      "id": "teaser-5324e3dfa5",
+      "brand": "EV-EDGE",
+      "title": "25 ₪ מתנה לטעינה חשמלית ברשת EV-EDGE",
+      "discount": "₪25 מתנה",
+      "discount_numeric": 25,
+      "discount_type": "gift",
+      "ongoing_discount": null,
+      "min_spend": null,
+      "min_spend_numeric": 0,
+      "coupon": "MASTERCARDAY",
+      "url": "https://play.google.com/store/apps/details?id=il.evedge.evedge",
+      "image": "https://www.mastercard.com/content/dam/mccom/eu/israel/mastercard-day/evedge-promo-image_1280x720.jpg",
+      "category": "חשמל וטכנולוגיה",
+      "validity": "10 בחודש בלבד",
+      "validity_code": "only_10th",
+      "valid_days": [
+        10
+      ],
+      "terms_bullets": [
+        "📍 ערוץ: באתר אונליין",
+        "💳 תקף למשלמים בכרטיס אשראי מאסטרקארד",
+        "📄 בכפוף לתקנון המלא של בית העסק"
+      ],
+      "description": "רוכשים חבילת טעינה בעלות 175 ₪ באפליקציית EV-EDGE ומקבלים 25 ₪ נוספים לטעינה במתנה. בתוקף למשלמים בכרטיס מאסטרקארד בלבד. בכפוף לתקנון המלא באתר מאסטרקארד דיי. ט.ל.ח אופן המימוש: מפורט התקנון לתקנון",
+      "updated_at": "2026-10-08T13:14:40Z"
     },
     {
       "id": "teaser-47f769a4eb",
@@ -684,7 +741,7 @@
       "ongoing_discount": null,
       "min_spend": null,
       "min_spend_numeric": 0,
-      "coupon": "&nbsp;MASTERCARDAY",
+      "coupon": "&nbsp;mastercard 10",
       "url": "https://www.gett.com/il/download?af_xp=text&registration_origin=partner_mastercard&referrer=partner_mastercard&source_caller=ui&pid=partner_mastercard&is_retargeting=true&deeplink=coupon_code_screen&action=view&shortlink=7sgf17w6&deep_link_value=%22action%3Dview%26deeplink%3Dcoupon_code_screen%26referrer%3Dpartner_mastercard%26registration_origin%3Dpartner_mastercard%22&af_reengagement_window=7d&c=partner_mastercard_website",
       "image": "https://www.mastercard.com/content/dam/mccom/eu/israel/mastercard-day/GETT%20SEP.png",
       "category": "תיירות ונופש",
@@ -697,8 +754,8 @@
         "📍 ערוץ: באפליקציה",
         "⚠️ ללא כפל מבצעים"
       ],
-      "description": "תקף בהזמנת נסיעה בחו\"ל בלבד (ביעדים המתמכים בשירות) ותקף להטענה באפליקציה ב-10 בחודש בלבד. ההטבה תקפה למימוש סוף החודש של אותו החודש. ללא כפל מבצעים. ניתן להזין הטבה אחת בחודש ולשימוש בהזמנה אחת בלבד מתן ההטבה וטיב המוצרים ו\\או השירותים באחריות בית העסק בלבד. בכפוף לתקנון המלא. קוד קופון: MASTERCARDAY לתקנון",
-      "updated_at": "2026-09-07T09:14:03Z"
+      "description": "תקף בהזמנת נסיעה בחו\"ל בלבד (ביעדים המתמכים בשירות) ותקף להטענה באפליקציה ב-10 בחודש בלבד. ההטבה תקפה למימוש סוף החודש של אותו החודש. ללא כפל מבצעים. ניתן להזין הטבה אחת בחודש ולשימוש בהזמנה אחת בלבד מתן ההטבה וטיב המוצרים ו\\או השירותים באחריות בית העסק בלבד. בכפוף לתקנון המלא. קוד קופון: mastercard 10 לתקנון",
+      "updated_at": "2026-10-06T10:40:13Z"
     },
     {
       "id": "teaser-8a15b566d4",
@@ -1374,33 +1431,6 @@
       ],
       "description": "ההטבה תקפה למזמינים בלינק היעודי בלבד ובתשלום בכרטיס מאסטרקארד. ההטבה תקפה בכל ימות החודש. יש לעקוב אחר השלבים המופיעים בתקנון המלא על מנת להנות מההטבה. קוד קופון: MASTERCARDAY לתקנון",
       "updated_at": "2026-05-26T12:54:02Z"
-    },
-    {
-      "id": "teaser-5324e3dfa5",
-      "brand": "EV-EDGE",
-      "title": "10 קוט\"ש מתנה לטעינה חשמלית ברשת EV-EDGE",
-      "discount": "הטבה בלעדית",
-      "discount_numeric": 0,
-      "discount_type": "special",
-      "ongoing_discount": null,
-      "min_spend": null,
-      "min_spend_numeric": 0,
-      "coupon": "MASTERCARDAY",
-      "url": "https://play.google.com/store/apps/details?id=il.evedge.evedge",
-      "image": "https://www.mastercard.com/content/dam/mccom/eu/israel/mastercard-day/evedge-promo-image_1280x720.jpg",
-      "category": "חשמל וטכנולוגיה",
-      "validity": "10 בחודש בלבד",
-      "validity_code": "only_10th",
-      "valid_days": [
-        10
-      ],
-      "terms_bullets": [
-        "📍 ערוץ: באתר אונליין",
-        "💳 תקף למשלמים בכרטיס אשראי מאסטרקארד",
-        "📄 בכפוף לתקנון המלא של בית העסק"
-      ],
-      "description": "רוכשים חבילת טעינה ב10 בחודש בעלות 175 ש\"ח באפליקציית EV-Edge ומקבלים בנוסף 10 קוט\"ש במתנה למימוש בטעינה הבאה שלכם. בתוקף למשלמים בכרטיס מאסטרקארד בלבד. בכפוף לתקנון המלא באתר מאסטרקארד דיי. ט.ל.ח אופן המימוש: מפורט התקנון לתקנון",
-      "updated_at": "2026-09-15T07:13:09Z"
     }
   ]
 }
