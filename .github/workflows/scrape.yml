@@ -5,8 +5,8 @@ on:
   schedule:
     # Runs automatically every Sunday at 06:00 UTC
     - cron: '0 6 * * 0'
-    # Runs automatically on the 9th and 10th of each month at 06:00 UTC
-    - cron: '0 6 9,10 * *'
+    # Runs automatically on the 8th, 9th, 10th, and 11th of each month at 06:00 UTC
+    - cron: '0 6 8,9,10,11 * *'
 
 permissions:
   contents: write # Allows committing updated deals.json and deals.csv
@@ -35,7 +35,7 @@ jobs:
         run: |
           python scraper.py
 
-      - name: Commit and push updated catalog
+      - name: Commit and push updated catalog locally
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -47,3 +47,29 @@ jobs:
             git push
           fi
 
+      - name: Checkout Master Repo (Behatsdaa-site-ai-mesh)
+        uses: actions/checkout@v4
+        with:
+          repository: 'elonuziel/Behatsdaa-site-ai-mesh'
+          token: ${{ secrets.MASTER_REPO_PAT }}
+          path: 'master-repo'
+          ref: 'main'
+
+      - name: Push Updated Mastercard Day Deals to Master Repo
+        run: |
+          mkdir -p master-repo/data/sources/mastercard
+          cp data/deals.json master-repo/data/sources/mastercard/deals.json
+
+          cd master-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet data/sources/mastercard/; then
+            echo "No changes in Mastercard Day deals for master repo."
+          else
+            echo "Pushing updated Mastercard Day deals to master repo..."
+            git add data/sources/mastercard/
+            git commit -m "chore(data): auto-sync latest Mastercard Day deals from scraper"
+            git push origin main
+            echo "Successfully pushed to master repo!"
+          fi
